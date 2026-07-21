@@ -6,9 +6,7 @@ import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
 import { CONFIG_ACOPERIS as C } from "../config/CONFIG";
 
-
-// === TEXTURI PROCEDURALE ===
-function hashNoise(x, y) {
+(x, y) {
   let h = x * 374761393 + y * 668265263 + 1274126177;
   h = (h ^ (h >> 13)) * 1274126177;
   return (h ^ (h >> 16)) / 2147483648;
@@ -54,8 +52,7 @@ function createRoughnessMap(size = 256) {
   return t;
 }
 
-const texNormal = createNormalMap();
-const texRough = createRoughnessMap();
+
 
 const rad = g => (g * Math.PI) / 180;
 const srgb = t => { if ("colorSpace" in t) t.colorSpace = THREE.SRGBColorSpace; else t.encoding = THREE.sRGBEncoding; return t; };
@@ -89,41 +86,90 @@ function shade(hex, f) {
   return `rgb(${r | 0},${g | 0},${b | 0})`;
 }
 
-function texInvelitoare(hex, tip) {  // returneaza {map,bump}
-  const c = document.createElement("canvas"); c.width = c.height = 512;
+function texInvelitoare(hex, tip) {
+  const S = 512;
+  const c = document.createElement("canvas"); c.width = c.height = S;
   const x = c.getContext("2d");
-  const gr = x.createLinearGradient(0, 0, 0, 512);
-  gr.addColorStop(0, shade(hex, 1.06)); gr.addColorStop(1, shade(hex, 0.94));
-  x.fillStyle = gr; x.fillRect(0, 0, 512, 512);
+  
+  // Noise simplu
+  const hash = (a, b) => { let h = a*374761393+b*668265263+1274126177; h=(h^(h>>13))*1274126177; return (h^(h>>16))/2147483648; };
+  
+  // Gradient de bază cu noise
+  const img = x.getImageData(0, 0, S, S);
+  for (let py = 0; py < S; py++) {
+    for (let px = 0; px < S; px++) {
+      const i = (py * S + px) * 4;
+      const noise = (hash(px*0.3, py*0.3) - 0.5) * 12;
+      const baseR = parseInt(hex.slice(1,3), 16) + noise;
+      const baseG = parseInt(hex.slice(3,5), 16) + noise;
+      const baseB = parseInt(hex.slice(5,7), 16) + noise;
+      img.data[i] = Math.max(0, Math.min(255, baseR));
+      img.data[i+1] = Math.max(0, Math.min(255, baseG));
+      img.data[i+2] = Math.max(0, Math.min(255, baseB));
+      img.data[i+3] = 255;
+    }
+  }
+  x.putImageData(img, 0, 0);
+  
   if (tip === "tabla") {
-    for (let px = 0; px < 512; px += 32) {
-      x.fillStyle = "rgba(0,0,0,0.42)"; x.fillRect(px, 0, 3, 512);
-      x.fillStyle = "rgba(255,255,255,0.16)"; x.fillRect(px + 3, 0, 2, 512);
-      x.fillStyle = "rgba(255,255,255,0.045)"; x.fillRect(px + 16, 0, 8, 512);
+    // Dungi de tabla cu variație
+    for (let px = 0; px < S; px += 32) {
+      const offset = (hash(px, 0) - 0.5) * 3;
+      x.fillStyle = "rgba(0,0,0,0.38)"; x.fillRect(px + offset, 0, 3, S);
+      x.fillStyle = "rgba(255,255,255,0.12)"; x.fillRect(px + offset + 3, 0, 2, S);
+      // Variație micro
+      for (let py = 0; py < S; py += 4) {
+        if (hash(px, py) > 0.7) {
+          x.fillStyle = "rgba(255,255,255,0.04)"; x.fillRect(px + offset + 10, py, 6, 2);
+        }
+      }
     }
   } else {
-    for (let py = 0; py < 512; py += 26) {
-      x.fillStyle = "rgba(0,0,0,0.45)"; x.fillRect(0, py, 512, 3);
-      x.fillStyle = "rgba(255,255,255,0.14)"; x.fillRect(0, py + 3, 512, 2);
-      for (let px = ((py / 26) % 2) * 22; px < 512; px += 44) {
-        x.fillStyle = "rgba(0,0,0,0.10)"; x.fillRect(px, py + 3, 2, 23);
+    // Țiglă cu variație per rând
+    for (let py = 0; py < S; py += 26) {
+      const shade = 0.35 + hash(0, py) * 0.2;
+      x.fillStyle = `rgba(0,0,0,${shade})`; x.fillRect(0, py, S, 3);
+      x.fillStyle = "rgba(255,255,255,0.12)"; x.fillRect(0, py + 3, S, 2);
+      for (let px = ((Math.floor(py/26)) % 2) * 22; px < S; px += 44) {
+        const varX = (hash(px, py) - 0.5) * 4;
+        x.fillStyle = "rgba(0,0,0,0.08)"; x.fillRect(px + varX, py + 3, 2 + Math.abs(varX), 23);
       }
     }
   }
-  for (let i = 0; i < 900; i++) {
-    x.fillStyle = Math.random() > 0.5 ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.03)";
-    x.fillRect(Math.random() * 512, Math.random() * 512, 1 + Math.random() * 2, 1 + Math.random() * 2);
+  
+  // Micro-imperfecțiuni
+  for (let i = 0; i < 1200; i++) {
+    const r = Math.random();
+    x.fillStyle = r > 0.6 ? "rgba(255,255,255,0.02)" : r > 0.3 ? "rgba(0,0,0,0.025)" : "rgba(255,255,255,0.01)";
+    x.fillRect(Math.random() * S, Math.random() * S, 1 + Math.random() * 2, 1 + Math.random() * 2);
   }
+  
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8;
-  const b = document.createElement("canvas"); b.width = b.height = 512;
+  
+  // Bump map
+  const b = document.createElement("canvas"); b.width = b.height = S;
   const bx = b.getContext("2d");
-  bx.fillStyle = "#808080"; bx.fillRect(0, 0, 512, 512);
-  if (tip === "tabla") {
-    for (let px = 0; px < 512; px += 32) { bx.fillStyle = "#ffffff"; bx.fillRect(px, 0, 5, 512); }
-  } else {
-    for (let py = 0; py < 512; py += 26) { bx.fillStyle = "#ffffff"; bx.fillRect(0, py, 512, 5); bx.fillStyle = "#5a5a5a"; bx.fillRect(0, py + 20, 512, 6); }
+  const bImg = bx.getImageData(0, 0, S, S);
+  for (let py = 0; py < S; py++) {
+    for (let px = 0; px < S; px++) {
+      const i = (py * S + px) * 4;
+      const v = 128 + (hash(px*0.5, py*0.5) - 0.5) * 30;
+      bImg.data[i] = bImg.data[i+1] = bImg.data[i+2] = v;
+      bImg.data[i+3] = 255;
+    }
   }
+  bx.putImageData(bImg, 0, 0);
+  
+  if (tip === "tabla") {
+    for (let px = 0; px < S; px += 32) { bx.fillStyle = "#f0f0f0"; bx.fillRect(px, 0, 5, S); }
+  } else {
+    for (let py = 0; py < S; py += 26) { 
+      bx.fillStyle = "#f0f0f0"; bx.fillRect(0, py, S, 5); 
+      bx.fillStyle = "#6a6a6a"; bx.fillRect(0, py + 20, S, 6); 
+    }
+  }
+  
   const bt = new THREE.CanvasTexture(b);
   bt.wrapS = bt.wrapT = THREE.RepeatWrapping; bt.anisotropy = 8;
   return { map: srgb(t), bump: bt };
