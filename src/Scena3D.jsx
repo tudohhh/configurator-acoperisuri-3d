@@ -216,6 +216,20 @@ export default function Scena3D({ cfg }) {
     const hRoof = (W / 2) * Math.tan(rad(panta));
 
     const scene = new THREE.Scene();
+  // Environment map procedural
+  const envCanvas = document.createElement('canvas'); envCanvas.width = 512; envCanvas.height = 256;
+  const envCtx = envCanvas.getContext('2d');
+  const skyGrad = envCtx.createLinearGradient(0, 0, 0, 150);
+  skyGrad.addColorStop(0, '#b4c8e0'); skyGrad.addColorStop(1, '#e8e4d8');
+  envCtx.fillStyle = skyGrad; envCtx.fillRect(0, 0, 512, 150);
+  const groundGrad = envCtx.createLinearGradient(0, 150, 0, 256);
+  groundGrad.addColorStop(0, '#c8b898'); groundGrad.addColorStop(1, '#a09078');
+  envCtx.fillStyle = groundGrad; envCtx.fillRect(0, 150, 512, 106);
+  const envTex = new THREE.CanvasTexture(envCanvas);
+  envTex.mapping = THREE.EquirectangularReflectionMapping;
+  envTex.colorSpace = THREE.SRGBColorSpace;
+  scene.environment = envTex;
+  scene.background = new THREE.Color('#dce8f0');
     const cam = new THREE.PerspectiveCamera(38, Wpx / Hpx, 0.1, 400);
     const rnd = new THREE.WebGLRenderer({ antialias: true });
     rnd.setPixelRatio(Math.min(window.devicePixelRatio, 2)); rnd.setSize(Wpx, Hpx);
