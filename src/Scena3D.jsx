@@ -407,6 +407,19 @@ export default function Scena3D({ cfg }) {
   coamaMesh.castShadow = true;
   scene.add(coamaMesh);
 
+  // Jgheaburi + burlane
+  const matJgheab = new THREE.MeshStandardMaterial({ color: 0x4a4a4a, roughness: 0.35, metalness: 0.9 });
+  [-1, 1].forEach(s => {
+    const jg = new THREE.Mesh(new THREE.BoxGeometry(L + 0.2, 0.05, 0.1), matJgheab);
+    jg.position.set(0, y0 - 0.05, z0 * s);
+    jg.castShadow = true; scene.add(jg);
+  });
+  [-1, 1].forEach(sx => {
+    const bl = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, hz, 8), matJgheab);
+    bl.position.set(L/2 * sx + 0.3 * sx, hz/2, z0 + 0.1);
+    bl.castShadow = true; scene.add(bl);
+  });
+
   // Streașină
   const matStreasina = new THREE.MeshStandardMaterial({ color: shade(M.hex, 0.5), roughness: 0.5, metalness: 0.15 });
   [-1, 1].forEach(s => {
