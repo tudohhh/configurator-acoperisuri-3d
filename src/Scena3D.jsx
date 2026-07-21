@@ -342,19 +342,6 @@ export default function Scena3D({ cfg }) {
   const geamLat = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.95, 0.75), matGeam);
   geamLat.position.set(L / 2 + 0.05, hz * 0.55, -W * 0.35);
   scene.add(geamLat);
-  // Usa (grup unitar)
-  const usaGroup = new THREE.Group();
-  const prag = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.04, 0.08), matToc);
-  prag.position.set(0, 0.02, 0.03); prag.castShadow = true; usaGroup.add(prag);
-  const tocUsa = new THREE.Mesh(new THREE.BoxGeometry(0.75, 2.2, 0.06), matToc);
-  tocUsa.position.set(0, 1.1, 0.02); tocUsa.castShadow = true; usaGroup.add(tocUsa);
-  const panouUsa = new THREE.Mesh(new THREE.BoxGeometry(0.6, 2.0, 0.02), matUsa);
-  panouUsa.position.set(0.03, 1.1, 0.05); usaGroup.add(panouUsa);
-  const clanță = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 8),
-    new THREE.MeshStandardMaterial({ color: 0xd4d4d4, roughness: 0.2, metalness: 0.95 }));
-  clanță.position.set(0.25, 1.15, 0.06); usaGroup.add(clanță);
-  usaGroup.position.set(-L * 0.3, 0, W / 2);
-  usaGroup.castShadow = true; scene.add(usaGroup);
     const soclu = new THREE.Mesh(new THREE.BoxGeometry(L + 0.14, 0.35, W + 0.14),
       new THREE.MeshStandardMaterial({ color: "#8f8a80", roughness: 1 }));
     soclu.position.y = 0.175; soclu.receiveShadow = true; scene.add(soclu);
