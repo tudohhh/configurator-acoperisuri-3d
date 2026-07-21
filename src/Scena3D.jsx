@@ -318,30 +318,40 @@ export default function Scena3D({ cfg }) {
     const casa = new THREE.Mesh(new THREE.BoxGeometry(L, hz, W), matZid);
     casa.position.y = hz / 2; casa.castShadow = true; casa.receiveShadow = true; scene.add(casa);
   // Ferestre + usa
-  const matToc = new THREE.MeshStandardMaterial({ color: 0x3a3a3a, roughness: 0.4, metalness: 0.6 });
-  const matGeam = new THREE.MeshPhysicalMaterial({ color: 0xd8e8f0, roughness: 0.1, metalness: 0.1, clearcoat: 0.5 });
-  const matUsa = new THREE.MeshStandardMaterial({ color: 0x5a3a2a, roughness: 0.5 });
-  // Fereastra fata
-  const fereastra = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.1, 0.04), matToc);
+  // Ferestre + usa (PBR real)
+  const matToc = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.35, metalness: 0.7 });
+  const matGeam = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.05, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.2, transparent: true, opacity: 0.85 });
+  const matUsa = new THREE.MeshStandardMaterial({ color: 0x4a2a1a, roughness: 0.45 });
+  // Fereastra fata cu pervaz
+  const pervaz1 = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.06, 0.08), matToc);
+  pervaz1.position.set(L * 0.35, hz * 0.55 - 0.55, W / 2 + 0.03);
+  pervaz1.castShadow = true; scene.add(pervaz1);
+  const fereastra = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.1, 0.05), matToc);
   fereastra.position.set(L * 0.35, hz * 0.55, W / 2 + 0.02);
   fereastra.castShadow = true; scene.add(fereastra);
   const geamFata = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.95, 0.01), matGeam);
-  geamFata.position.set(L * 0.35, hz * 0.55, W / 2 + 0.04);
+  geamFata.position.set(L * 0.35, hz * 0.55, W / 2 + 0.05);
   scene.add(geamFata);
-  // Fereastra lateral
-  const fereastra2 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 1.1, 0.9), matToc);
+  // Fereastra laterala cu pervaz
+  const pervaz2 = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 1.0), matToc);
+  pervaz2.position.set(L / 2 + 0.03, hz * 0.55 - 0.55, -W * 0.2);
+  pervaz2.castShadow = true; scene.add(pervaz2);
+  const fereastra2 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.1, 0.9), matToc);
   fereastra2.position.set(L / 2 + 0.02, hz * 0.55, -W * 0.2);
   fereastra2.castShadow = true; scene.add(fereastra2);
   const geamLat = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.95, 0.75), matGeam);
-  geamLat.position.set(L / 2 + 0.04, hz * 0.55, -W * 0.2);
+  geamLat.position.set(L / 2 + 0.05, hz * 0.55, -W * 0.2);
   scene.add(geamLat);
-  // Usa
-  const usa = new THREE.Mesh(new THREE.BoxGeometry(0.65, 2.1, 0.04), matUsa);
+  // Usa cu prag
+  const prag = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.04, 0.08), matToc);
+  prag.position.set(-L * 0.3, 0.02, W / 2 + 0.03);
+  prag.castShadow = true; scene.add(prag);
+  const usa = new THREE.Mesh(new THREE.BoxGeometry(0.65, 2.1, 0.05), matUsa);
   usa.position.set(-L * 0.3, 1.05, W / 2 + 0.02);
   usa.castShadow = true; scene.add(usa);
-  const clanță = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 8),
-    new THREE.MeshStandardMaterial({ color: 0xc0c0c0, roughness: 0.3, metalness: 0.95 }));
-  clanță.position.set(-L * 0.3 + 0.2, 1.1, W / 2 + 0.05);
+  const clanță = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 8),
+    new THREE.MeshStandardMaterial({ color: 0xd4d4d4, roughness: 0.2, metalness: 0.95 }));
+  clanță.position.set(-L * 0.3 + 0.2, 1.1, W / 2 + 0.06);
   scene.add(clanță);
     const soclu = new THREE.Mesh(new THREE.BoxGeometry(L + 0.14, 0.35, W + 0.14),
       new THREE.MeshStandardMaterial({ color: "#8f8a80", roughness: 1 }));
