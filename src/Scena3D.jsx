@@ -293,7 +293,27 @@ export default function Scena3D({ cfg }) {
     zg.addColorStop(0, "rgba(45,40,32,0.42)"); zg.addColorStop(1, "rgba(45,40,32,0)");
     zx.fillStyle = zg; zx.fillRect(0, 0, 64, 70);
     const ztx = srgb(new THREE.CanvasTexture(zc));
-    const matZid = new THREE.MeshStandardMaterial({ map: ztx, roughness: 0.95 });
+    const matZid = new THREE.MeshStandardMaterial({ map: ztx, roughness: 0.92,
+    normalMap: (() => {
+      const nc = document.createElement('canvas'); nc.width = nc.height = 256;
+      const nctx = nc.getContext('2d');
+      const nimg = nctx.getImageData(0, 0, 256, 256);
+      for (let y = 0; y < 256; y++) {
+        for (let x = 0; x < 256; x++) {
+          const i = (y*256+x)*4;
+          const n = ((x*374761393+y*668265263+1274126177)^((x*374761393+y*668265263+1274126177)>>16))/2147483648;
+          nimg.data[i] = 128 + (n-0.5)*25;
+          nimg.data[i+1] = 128 + (n-0.5)*25;
+          nimg.data[i+2] = 255; nimg.data[i+3] = 255;
+        }
+      }
+      nctx.putImageData(nimg, 0, 0);
+      const nt = new THREE.CanvasTexture(nc);
+      nt.wrapS = nt.wrapT = THREE.RepeatWrapping;
+      nt.repeat.set(4, 3); nt.colorSpace = THREE.LinearSRGBColorSpace;
+      return nt;
+    })(),
+    normalScale: new THREE.Vector2(0.25, 0.25) });
     const casa = new THREE.Mesh(new THREE.BoxGeometry(L, hz, W), matZid);
     casa.position.y = hz / 2; casa.castShadow = true; casa.receiveShadow = true; scene.add(casa);
   // Ferestre + usa
