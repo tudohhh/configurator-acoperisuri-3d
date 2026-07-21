@@ -6,12 +6,6 @@ import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
 import { CONFIG_ACOPERIS as C } from "../config/CONFIG";
 
-(x, y) {
-  let h = x * 374761393 + y * 668265263 + 1274126177;
-  h = (h ^ (h >> 13)) * 1274126177;
-  return (h ^ (h >> 16)) / 2147483648;
-}
-
 function createNormalMap(size = 256) {
   const c = document.createElement('canvas');
   c.width = size; c.height = size;
