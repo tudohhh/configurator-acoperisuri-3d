@@ -4,6 +4,7 @@
 // Structura proiect: vezi acoperis-REPRODUCERE.txt
 import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
+import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import { CONFIG_ACOPERIS as C } from "../config/CONFIG";
 
 function createNormalMap(size = 256) {
