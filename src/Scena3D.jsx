@@ -5,6 +5,7 @@
 import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
 import { EffectComposer, RenderPass, UnrealBloomPass, ShaderPass } from "three/addons/Addons.js";
+import { SSAOPass } from "three/addons/postprocessing/SSAOPass.js";
 import { VignetteShader } from "three/addons/shaders/VignetteShader.js";
 import { CONFIG_ACOPERIS as C } from "../config/CONFIG";
 
@@ -583,6 +584,13 @@ export default function Scena3D({ cfg }) {
     let raf;
     const composer = new EffectComposer(rnd);
   composer.addPass(new RenderPass(scene, cam));
+  // SSAO - occluzie ambientala
+  const ssaoPass = new SSAOPass(scene, cam, 800, 500);
+  ssaoPass.kernelRadius = 12;
+  ssaoPass.minDistance = 0.005;
+  ssaoPass.maxDistance = 0.1;
+  ssaoPass.output = 0; // 0 = SSAO only, blend in shader
+  composer.addPass(ssaoPass);
   const bloomPass = new UnrealBloomPass(new THREE.Vector2(800, 500), 0.5, 0.3, 0.9);
   bloomPass.threshold = 0.85;
   composer.addPass(bloomPass);
