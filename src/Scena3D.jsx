@@ -458,6 +458,15 @@ export default function Scena3D({ cfg }) {
         }
       }
       const bt = new THREE.CanvasTexture(bc); bt.wrapS = bt.wrapT = THREE.RepeatWrapping; bt.repeat.set(2, hTop * 6);
+  // Coama (element fizic pe muchie)
+  const matCoama = new THREE.MeshStandardMaterial({ color: shade(M.hex, 0.5), roughness: 0.45, metalness: 0.2 });
+  const coamaGeo = new THREE.CylinderGeometry(0.05, 0.05, L, 8);
+  coamaGeo.rotateZ(Math.PI / 2);
+  const coamaMesh = new THREE.Mesh(coamaGeo, matCoama);
+  coamaMesh.position.set(0, yv + 0.03, 0);
+  coamaMesh.castShadow = true;
+  scene.add(coamaMesh);
+
       const horn = new THREE.Mesh(new THREE.BoxGeometry(0.75, hTop, 0.55),
         new THREE.MeshStandardMaterial({ map: ht, bumpMap: bt, bumpScale: 0.03, roughness: 0.85 }));
       horn.position.set(hx, hTop / 2, hzp); horn.castShadow = true; scene.add(horn);
