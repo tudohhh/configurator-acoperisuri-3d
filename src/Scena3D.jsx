@@ -389,18 +389,37 @@ export default function Scena3D({ cfg }) {
     { const hx = -L / 4, hzp = -W / 5;
       const dyC = Math.min(Math.abs(hzp) * Math.tan(rad(panta)) + 0, hRoof);
       const hTop = (tip === "mansardat" ? yCoama : y0 + hRoof - dyC) + 1.0;
-      // Textura caramida horn
-      const hc = document.createElement('canvas'); hc.width = hc.height = 128;
-      const hx2 = hc.getContext('2d'); hx2.fillStyle = '#c9b8a0'; hx2.fillRect(0,0,128,128);
-      for (let py=0; py<128; py+=16) {
-        for (let px=(Math.floor(py/16)%2)*20; px<128; px+=40) {
-          hx2.fillStyle='rgba(0,0,0,'+(0.05+Math.random()*0.1)+')'; hx2.fillRect(px,py,18,7);
-          hx2.fillStyle='rgba(0,0,0,0.15)'; hx2.fillRect(px,py+7,18,1);
+      // Textura caramida (Gemini: #b23b23, rosturi #8d9194, pattern 64x32)
+      const hc = document.createElement("canvas"); hc.width = hc.height = 512;
+      const hctx = hc.getContext("2d");
+      const bw = 64, bh = 32, gap = 5;
+      hctx.fillStyle = "#8d9194"; hctx.fillRect(0, 0, 512, 512);
+      for (let row = 0; row < 512; row += bh + gap) {
+        const off = (Math.floor(row / (bh + gap)) % 2) * (bw / 2 + gap / 2);
+        for (let col = -bw; col < 512; col += bw + gap) {
+          const x = col + off, y = row;
+          const r = 178 + (Math.random() - 0.5) * 20, g = 35 + (Math.random() - 0.5) * 10, b = 35 + (Math.random() - 0.5) * 10;
+          hctx.fillStyle = `rgb(${r},${g},${b})`;
+          hctx.fillRect(x + gap, y + gap, bw, bh);
+          hctx.fillStyle = "rgba(255,255,255,0.08)"; hctx.fillRect(x + gap, y + gap, bw, bh / 3);
+          hctx.fillStyle = "rgba(0,0,0,0.1)"; hctx.fillRect(x + gap, y + gap + bh * 0.7, bw, bh * 0.3);
         }
       }
-      const ht = new THREE.CanvasTexture(hc); ht.wrapS=ht.wrapT=THREE.RepeatWrapping; ht.repeat.set(2, hTop*3);
+      const ht = new THREE.CanvasTexture(hc); ht.wrapS = ht.wrapT = THREE.RepeatWrapping; ht.repeat.set(2, hTop * 6);
+      // Bump map
+      const bc = document.createElement("canvas"); bc.width = bc.height = 512;
+      const bctx = bc.getContext("2d");
+      bctx.fillStyle = "#000000"; bctx.fillRect(0, 0, 512, 512);
+      for (let row = 0; row < 512; row += bh + gap) {
+        const off = (Math.floor(row / (bh + gap)) % 2) * (bw / 2 + gap / 2);
+        for (let col = -bw; col < 512; col += bw + gap) {
+          bctx.fillStyle = "#ffffff";
+          bctx.fillRect(col + off + gap, row + gap, bw, bh);
+        }
+      }
+      const bt = new THREE.CanvasTexture(bc); bt.wrapS = bt.wrapT = THREE.RepeatWrapping; bt.repeat.set(2, hTop * 6);
       const horn = new THREE.Mesh(new THREE.BoxGeometry(0.75, hTop, 0.55),
-        new THREE.MeshStandardMaterial({ map: ht, roughness: 0.85 }));
+        new THREE.MeshStandardMaterial({ map: ht, bumpMap: bt, bumpScale: 0.03, roughness: 0.85 }));
       horn.position.set(hx, hTop / 2, hzp); horn.castShadow = true; scene.add(horn);
       const cap = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.12, 0.7),
         new THREE.MeshStandardMaterial({ color: "#4d443a", roughness: 0.8 }));
