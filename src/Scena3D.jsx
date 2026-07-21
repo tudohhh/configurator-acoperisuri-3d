@@ -254,12 +254,12 @@ export default function Scena3D({ cfg }) {
   })();
   // Dealuri
   const hillsGroup = new THREE.Group();
-  const hill1 = new THREE.Mesh(new THREE.CylinderGeometry(150, 150, 50, 32, 1, true, 0, Math.PI),
+  const hill1 = new THREE.Mesh(new THREE.CylinderGeometry(200, 200, 60, 32, 1, true, 0, Math.PI),
     new THREE.MeshBasicMaterial({ color: 0x90be6d }));
-  hill1.position.set(0, -20, -100); hill1.rotation.y = Math.PI * 0.25; hillsGroup.add(hill1);
-  const hill2 = new THREE.Mesh(new THREE.CylinderGeometry(120, 120, 40, 32, 1, true, 0, Math.PI),
+  hill1.position.set(0, -15, -40); hill1.rotation.y = Math.PI * 0.25; hillsGroup.add(hill1);
+  const hill2 = new THREE.Mesh(new THREE.CylinderGeometry(160, 160, 50, 32, 1, true, 0, Math.PI),
     new THREE.MeshBasicMaterial({ color: 0x43aa8b }));
-  hill2.position.set(-20, -25, -70); hillsGroup.add(hill2);
+  hill2.position.set(-15, -20, -30); hillsGroup.add(hill2);
   scene.add(hillsGroup);
     scene.fog = new THREE.Fog("#e6eae7", 55, 170);
 
