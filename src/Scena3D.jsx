@@ -324,7 +324,7 @@ export default function Scena3D({ cfg }) {
   const bumpTex = new THREE.CanvasTexture(bumpCanvas); bumpTex.wrapS = bumpTex.wrapT = THREE.RepeatWrapping;
   bumpTex.repeat.set(L*2, hz*2); bumpTex.colorSpace = THREE.LinearSRGBColorSpace;
   const matZid = new THREE.MeshStandardMaterial({ color: '#f4f1ea', map: tencTex, roughness: 0.88,
-    bumpMap: bumpTex, bumpScale: 0.008,
+    bumpMap: bumpTex, bumpScale: 0.008 });
       const casa = new THREE.Mesh(new THREE.BoxGeometry(L, hz, W), matZid);
     casa.position.y = hz / 2; casa.castShadow = true; casa.receiveShadow = true; scene.add(casa);
   // Ferestre + usa
