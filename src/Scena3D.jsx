@@ -239,10 +239,28 @@ export default function Scena3D({ cfg }) {
     if ("outputColorSpace" in rnd) rnd.outputColorSpace = THREE.SRGBColorSpace;
     else rnd.outputEncoding = THREE.sRGBEncoding;
     rnd.toneMapping = THREE.ACESFilmicToneMapping;
-  rnd.toneMappingExposure = 1.4; rnd.toneMappingExposure = 1.06;
+  rnd.toneMappingExposure = 1.4;
     el.appendChild(rnd.domElement);
 
-    scene.background = texCer();
+    // Fundal: cer cu gradient + dealuri
+  (() => {
+    const bgCanvas = document.createElement('canvas'); bgCanvas.width = 2; bgCanvas.height = 512;
+    const bgCtx = bgCanvas.getContext('2d');
+    const bgGrad = bgCtx.createLinearGradient(0, 0, 0, 512);
+    bgGrad.addColorStop(0, '#87CEEB'); bgGrad.addColorStop(0.7, '#E0F6FF'); bgGrad.addColorStop(1, '#D8E2DC');
+    bgCtx.fillStyle = bgGrad; bgCtx.fillRect(0, 0, 2, 512);
+    const skyTex = new THREE.CanvasTexture(bgCanvas); skyTex.colorSpace = THREE.SRGBColorSpace;
+    scene.background = skyTex;
+  })();
+  // Dealuri
+  const hillsGroup = new THREE.Group();
+  const hill1 = new THREE.Mesh(new THREE.CylinderGeometry(150, 150, 50, 32, 1, true, 0, Math.PI),
+    new THREE.MeshBasicMaterial({ color: 0x90be6d }));
+  hill1.position.set(0, -20, -100); hill1.rotation.y = Math.PI * 0.25; hillsGroup.add(hill1);
+  const hill2 = new THREE.Mesh(new THREE.CylinderGeometry(120, 120, 40, 32, 1, true, 0, Math.PI),
+    new THREE.MeshBasicMaterial({ color: 0x43aa8b }));
+  hill2.position.set(-20, -25, -70); hillsGroup.add(hill2);
+  scene.add(hillsGroup);
     scene.fog = new THREE.Fog("#e6eae7", 55, 170);
 
     const teren = new THREE.Mesh(new THREE.PlaneGeometry(320, 320),
