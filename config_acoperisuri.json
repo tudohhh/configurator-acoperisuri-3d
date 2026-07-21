@@ -1,0 +1,33 @@
+{
+  "company_id": "acoperis_pro_01",
+  "company_name": "Acoperișuri & Montaj Pro SRL",
+  "service_domain": "Sisteme Complete de Acoperișuri & Detașări",
+  "currency": "LEI",
+  "tva_status": "Prețurile afișate includ TVA (19%)",
+  "pricing_grid": {
+    "materiale_per_mp": {
+      "tabla_bilka_standard": 45,
+      "tabla_bilka_premium": 75,
+      "tigla_ceramica": 110
+    },
+    "manopera_per_mp": {
+      "montaj_simplu": 35,
+      "reparatie_dulgherie_montaj": 65
+    },
+    "servicii_optionale": {
+      "demontare_acoperis_vechi_per_mp": 15,
+      "jgheaburi_burlane_per_ml": 25
+    },
+    "taxe_fixe": {
+      "deplasare_transport_materiale": 300,
+      "comanda_minima_valoare": 2500
+    },
+    "interval_toleranta_procent": 0.10
+  },
+  "limits": {
+    "min_realistic_mp": 20,
+    "max_realistic_mp": 1500
+  },
+  "cta_message": "Doriți să vă programeze colegul nostru o vizită la fața locului pentru măsurători exacte și verificarea dulgheriei?",
+  "disclaimer": "Această estimare are caracter strict orientativ și este calculată pe suprafață estimată/3D. Nu constituie o ofertă comercială fermă. Devizul final se emite exclusiv după verificarea pe teren."
+}

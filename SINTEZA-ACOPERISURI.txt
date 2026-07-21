@@ -1,0 +1,53 @@
+# SINTEZA-ACOPERISURI.txt — 20.07.2026
+Ce iese cand pui cap la cap: config_acoperisuri.json + calculation_engine_acoperisuri.py
++ idei-service-auto-constructii.txt (sectiunea constructii/ierarhie).
+
+================================================================
+1. CE EXISTA DEJA (nu e idee, e produs schitat)
+================================================================
+- config_acoperisuri.json = echivalentul CONFIG-v2.1 de la mobila:
+  materiale/mp (Bilka std 45, Bilka premium 75, tigla ceramica 110),
+  manopera/mp (montaj simplu 35, reparatie dulgherie+montaj 65),
+  optionale (demontare 15/mp, jgheaburi+burlane 25/ml),
+  taxe fixe (transport 300, comanda minima 2500), TVA inclus,
+  interval toleranta ±10%, limite realiste 20-1500 mp, CTA vizita teren.
+  ATENTIE: firma "Acoperisuri & Montaj Pro SRL" = PLACEHOLDER, preturi
+  orientative — de calibrat cu un client real (ca la Popescu/Cozma).
+- calculation_engine_acoperisuri.py = calcul-v2 al domeniului:
+  cantitati x pret, pierderi 10% pe taieturi (aceeasi regula ca placile!),
+  estimare min-max, guardrails, disclaimer + CTA.
+
+================================================================
+2. CE VALIDEAZA
+================================================================
+Teza centrala din IDEI e confirmata practic: motorul e generic
+(alegeri -> cantitati -> cost x adaos -> deviz), doar CONFIG-ul e per
+domeniu. Portarea modelului Cozma pe acoperisuri = o seara, 2 fisiere.
+Ierarhia din idei-service-auto-constructii ramane: ACOPERISURI = top 3
+general (potrivire pe motor, comanda medie 15-60k lei, firme care
+oferteaza manual exact pe formula asta, pret abonament 300-500 lei/luna).
+
+================================================================
+3. DIFERENTE FATA DE MOBILA (toate spre "mai simplu")
+================================================================
+- input = dimensiuni/mp, nu geometrie de corp
+- interval min-max in loc de pret fix (onest pt teren)
+- TVA inclus in afisare
+- CTA = programare vizita masuratori (lead si mai calificat)
+=> time-to-market mai mic decat a fost configuratorul Cozma.
+
+================================================================
+4. ORDINEA CORECTA (regula de aur ramane in vigoare)
+================================================================
+1) Cozma LIVE complet (backend cereri + link predat + telefon)
+2) Backend-ul devine componenta reutilizabila
+3) Port UI existent pe config acoperisuri (mare parte refolosire)
+4) Primul client de acoperisuri, cautat CU produsul functional si
+   studiul de caz Cozma in mana; calibrare pe o oferta reala a lui
+5) Abia apoi domeniile 4+ (fatade, pavaje etc. — aceleasi firme,
+   upsell natural)
+
+================================================================
+5. INTREBARE DESCHISA (discutata 20.07): configurator 3D la acoperisuri?
+================================================================
+Vezi discutia din chat — concluzia noteaz-o aici cand se decide.

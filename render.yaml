@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: configurator-acoperisuri-3d
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    pullRequestPreviewsEnabled: true
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache

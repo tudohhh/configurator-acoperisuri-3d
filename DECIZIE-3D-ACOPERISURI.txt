@@ -1,0 +1,76 @@
+# DECIZIE-3D-ACOPERISURI.txt — 20.07.2026
+Completeaza sectiunea 5 din SINTEZA-ACOPERISURI.txt.
+DECIZIE (fondator): configuratorul de acoperisuri se face CU model 3D
+DIN PRIMA VERSIUNE. Argumentele complete, pro si contra, mai jos.
+
+================================================================
+1. ARGUMENTE PRO 3D (de ce s-a decis asa)
+================================================================
+a) 3D-ul e INSTRUMENT DE INPUT, nu ornament. Problema reala a
+   domeniului: clientul NU isi stie mp de acoperis — stie "casa e cam
+   10 pe 8, cu doua ape". Modelul parametric (lungime x latime x panta
+   x tip) calculeaza singur cantitatile pe care clientul altfel le-ar
+   ghici gresit:
+   - mp invelitoare (cresc cu panta! mp_real = mp_amprenta / cos(panta))
+   - ml coama (2 ape vs 4 ape = formule diferite)
+   - ml streasina => cantitatea de jgheaburi/burlane precompletata
+   => devizul devine mai PRECIS, nu doar mai frumos. Direct legat de
+   calitatea estimarii min-max din motor.
+b) Diferentiator comercial: orice firma de acoperisuri are un Excel;
+   nimeni pe piata locala nu are "trage de casa ta si vezi pretul".
+   La vanzarea abonamentului (300-500 lei/luna), demo-ul 3D vinde.
+c) Incredere client: vede diferenta vizuala 2 ape / 4 ape / mansardat
+   si invelitoarea ca culoare/material => estimarea "pare masurata",
+   nu inventata. CTA-ul de vizita pe teren converteste mai bine.
+d) Cost marginal MIC: three.js, scena showroom, camera cu inertie,
+   pipeline-ul de build si deploy EXISTA din proiectul Cozma.
+   Un acoperis parametric e geometrie mai simpla decat dulapul cu
+   sertare/balamale (4-6 plane inclinate + coama + streasina).
+e) Coerenta de produs: "configuratoare 3D pentru meseriasi" devine
+   promisiunea intregii platforme, nu exceptia de la mobila. Studiul
+   de caz Cozma + acoperisuri 3D = pattern vandabil pe domeniile 3+.
+f) Deschide upgrade-uri naturale: zone selectabile pe model (doar o
+   apa se repara), mai tarziu potrivire cu satelit.
+
+================================================================
+2. ARGUMENTE CONTRA (cunoscute si asumate la decizie)
+================================================================
+a) La acoperisuri decizia de cumparare e "cat costa", nu "cum arata" —
+   devizul + programarea raman nucleul valorii; 3D-ul nu le inlocuieste.
+b) Time-to-market mai mare decat varianta formular-only (estimat +
+   cateva zile de lucru pe geometrie/UI fata de v1 fara 3D).
+c) Risc de scope creep spre fotorealism (vezi sect. 3 — interzis in v1).
+d) Pe mobil, scena 3D cere atentie la performanta si layout (lectie
+   de luat din tuningul Cozma).
+=> Asumate: (a) se rezolva pentru ca 3D-ul aici SERVESTE devizul (input),
+   (b) e acceptat constient, (c)+(d) se tin in frau prin sect. 3.
+
+================================================================
+3. CE INSEAMNA "3D" IN V1 (garduri anti-scope-creep)
+================================================================
+DA: model SCHEMATIC parametric: corp casa (paralelipiped) + acoperis
+    2 ape / 4 ape / mansardat, slidere lungime/latime/inaltime pantei,
+    material ca preset de culoare (Bilka std/premium, tigla), coama si
+    streasina evidentiate; cantitatile afisate live langa pret.
+NU (in v1): fotorealism, texturi elaborate de tigla, lucarne/dolii
+    complexe, forme de casa in L/T, reconstructia casei reale a
+    clientului, masurare din satelit (coada lunga).
+Regula mostenita de la Cozma: atipic -> "cere oferta / vizita teren".
+
+================================================================
+4. NOTE DE IMPLEMENTARE (cand incepe lucrul)
+================================================================
+- Refolosire: Scena3D-v2 (lumini, camera, podea->teren), structura
+  Configurator-v2 (panouri plutitoare, pret animat), Formular (cu
+  CTA schimbat: programare vizita masuratori), pipeline GitHub+Render.
+- Motorul: portare calculation_engine_acoperisuri.py in JS, cu
+  geometria ca sursa de cantitati (mp panta-corectati, ml coama,
+  ml streasina) in loc de input manual mp.
+- CONFIG per firma, ca la Cozma. Preturile actuale = placeholder,
+  calibrare obligatorie pe oferte reale ale primului client.
+
+================================================================
+5. CONDITIA DE START (neschimbata)
+================================================================
+Nimic din toate astea nu incepe pana Cozma nu e LIVE complet
+(backend cereri + link predat + telefon). Regula de aur ramane.

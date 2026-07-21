@@ -1,0 +1,74 @@
+# acoperis-REPRODUCERE.txt — 20.07.2026
+Cum se reconstruieste proiectul COMPLET din backup-urile din acest folder.
+Stare la salvare: BUILD VALIDAT LOCAL (vite build, 0 erori), motor testat,
+3 runde de rafinare vizuala trecute pe screenshot-uri. NU e inca pe GitHub.
+
+================================================================
+STRUCTURA PROIECT (configurator-acoperis)
+================================================================
+configurator-acoperis/
+├── package.json          <- continut mai jos
+├── vite.config.js        <- continut mai jos
+├── index.html            <- continut mai jos
+├── .gitignore            <- node_modules / dist / .DS_Store
+├── config/
+│   └── CONFIG.js         <- din acoperis-config-CONFIG.js (scoate primele 3 linii de comentariu BACKUP)
+└── src/
+    ├── main.jsx          <- continut mai jos
+    ├── App.jsx           <- din acoperis-src-App.jsx (idem)
+    ├── Scena3D.jsx       <- din acoperis-src-Scena3D.jsx (idem)
+    └── calcul.js         <- din acoperis-src-calcul.js (idem)
+
+Build: npm install && npm run build  |  Render: Static Site, publish dist
+
+--- package.json ---
+{
+  "name": "configurator-acoperis",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": { "dev": "vite", "build": "vite build", "preview": "vite preview" },
+  "dependencies": { "react": "^18.3.1", "react-dom": "^18.3.1", "three": "^0.160.0" },
+  "devDependencies": { "@vitejs/plugin-react": "^4.3.1", "vite": "^5.4.0" }
+}
+
+--- vite.config.js ---
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+export default defineConfig({ plugins: [react()] });
+
+--- index.html ---
+<!doctype html>
+<html lang="ro"><head><meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Configurator acoperiș</title></head>
+<body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>
+
+--- src/main.jsx ---
+import React from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App.jsx";
+createRoot(document.getElementById("root")).render(<App />);
+
+================================================================
+ISTORIC RAFINARI VIZUALE (deja incluse in fisierele salvate)
+================================================================
+R1 (4 fixuri audit "desene animate"): texturi procedurale invelitoare + RAL,
+   cer gradient + umbra contact, grosime + pazie + goluri retrase, teren +
+   apron/alee/copaci.
+R2 (5 fixuri audit world-class): bumpMap pe falturi/randuri, UV per fata pe
+   linia pantei (falturile curg spre streasina), ocluzie sub streasina,
+   horn + copac variat, haze soare + bordura apron + vigneta.
+R3 (lumina falsa pe fete adiacente): key mutat lateral (L*1.7, +6.5, W*0.3),
+   hemisferic 0.38 / fill 0.26, expunere 1.06, baghete pe hip ridges la 4 ape.
+
+================================================================
+URMATORII PASI (cand se reia)
+================================================================
+1. Repo GitHub public "configurator-acoperis" + token cu Contents R/W pe el
+2. Push (structura de mai sus) + Render Static Site
+3. Slefuire pe live full-screen
+4. Backend cereri COMUN cu mobila (TODO in Formular la ambele)
+5. Calibrare preturi pe primul client real (acum PLACEHOLDER)
+Nota: Cozma primeste linkul de mobila pentru debugging — vezi PROIECT-v3
+pentru starea acelui proiect.
