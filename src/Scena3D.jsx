@@ -6,6 +6,57 @@ import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
 import { CONFIG_ACOPERIS as C } from "../config/CONFIG";
 
+
+// === TEXTURI PROCEDURALE ===
+function hashNoise(x, y) {
+  let h = x * 374761393 + y * 668265263 + 1274126177;
+  h = (h ^ (h >> 13)) * 1274126177;
+  return (h ^ (h >> 16)) / 2147483648;
+}
+
+function createNormalMap(size = 256) {
+  const c = document.createElement('canvas');
+  c.width = size; c.height = size;
+  const ctx = c.getContext('2d');
+  const img = ctx.getImageData(0, 0, size, size);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const i = (y * size + x) * 4;
+      const stripe = Math.sin(y / size * 60) * 0.5 + 0.5;
+      const n = hashNoise(x * 0.5, y * 0.5) * 0.25;
+      img.data[i] = 128 + (stripe + n - 0.5) * 180;
+      img.data[i+1] = 128 + hashNoise(y, x) * 35;
+      img.data[i+2] = 255;
+      img.data[i+3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.colorSpace = THREE.LinearSRGBColorSpace;
+  return t;
+}
+
+function createRoughnessMap(size = 256) {
+  const c = document.createElement('canvas');
+  c.width = size; c.height = size;
+  const ctx = c.getContext('2d');
+  const img = ctx.getImageData(0, 0, size, size);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const v = 150 + hashNoise(i/4%size, Math.floor(i/4/size)) * 25;
+    img.data[i] = img.data[i+1] = img.data[i+2] = v;
+    img.data[i+3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.colorSpace = THREE.LinearSRGBColorSpace;
+  return t;
+}
+
+const texNormal = createNormalMap();
+const texRough = createRoughnessMap();
+
 const rad = g => (g * Math.PI) / 180;
 const srgb = t => { if ("colorSpace" in t) t.colorSpace = THREE.SRGBColorSpace; else t.encoding = THREE.sRGBEncoding; return t; };
 
