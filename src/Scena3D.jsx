@@ -489,19 +489,6 @@ export default function Scena3D({ cfg }) {
       co.position.set(0, yCoama + 0.06, 0); co.castShadow = true; scene.add(co);
     }
 
-    const gol = (w, h, px, py, geamHex) => {
-      const rama = new THREE.Mesh(new THREE.BoxGeometry(w + 0.16, h + 0.16, 0.05),
-        new THREE.MeshStandardMaterial({ color: "#c9c2b2", roughness: 0.9 }));
-      rama.position.set(px, py, W / 2 + 0.025); scene.add(rama);
-      const panel = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.05),
-        new THREE.MeshStandardMaterial(geamHex
-          ? { color: geamHex, roughness: 0.15, metalness: 0.5 }
-          : { color: "#4a4038", roughness: 0.8 }));
-      panel.position.set(px, py, W / 2 + 0.032); panel.castShadow = true; scene.add(panel);
-    };
-    gol(0.95, 2.05, -L / 5, 1.025, null);
-    gol(1.4, 1.2, L / 6, 1.5, "#9db6c4");
-    if (L > 8) gol(1.4, 1.2, L / 2.6, 1.5, "#9db6c4");
 
     { const hx = -L / 4, hzp = -W / 5;
       const dyC = Math.min(Math.abs(hzp) * Math.tan(rad(panta)) + 0, hRoof);
