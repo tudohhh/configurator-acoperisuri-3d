@@ -240,6 +240,7 @@ export default function Scena3D({ cfg }) {
     else rnd.outputEncoding = THREE.sRGBEncoding;
     rnd.toneMapping = THREE.ACESFilmicToneMapping;
   rnd.toneMappingExposure = 1.4;
+    rnd.setClearColor(0xdce8f0);
     el.appendChild(rnd.domElement);
 
     // Fundal: cer cu gradient + dealuri
@@ -264,6 +265,11 @@ export default function Scena3D({ cfg }) {
     const teren = new THREE.Mesh(new THREE.PlaneGeometry(320, 320),
       new THREE.MeshStandardMaterial({ map: texTeren(), roughness: 1 }));
     teren.rotation.x = -Math.PI / 2; teren.receiveShadow = true; scene.add(teren);
+  // Plan imens pentru continuitate
+  const bigGround = new THREE.Mesh(new THREE.PlaneGeometry(400, 400),
+    new THREE.MeshStandardMaterial({ color: 0xe8e4dc, roughness: 0.95 }));
+  bigGround.rotation.x = -Math.PI / 2; bigGround.position.y = -0.02; bigGround.receiveShadow = true;
+  scene.add(bigGround);
     const apron = new THREE.Mesh(new THREE.PlaneGeometry(L + 3.2, W + 3.2),
       new THREE.MeshStandardMaterial({ color: "#c7c2b5", roughness: 0.95 }));
     apron.rotation.x = -Math.PI / 2; apron.position.y = 0.012; apron.receiveShadow = true; scene.add(apron);
