@@ -566,7 +566,7 @@ export default function Scena3D({ cfg }) {
       sortH.position.set(hx, 0.02, hzp); sortH.castShadow = true; scene.add(sortH); }
 
     const target = new THREE.Vector3(0, (hz + hRoof) / 2 + 0.6, 0);
-    const rRest = Math.max(L, W) * 1.35 + 6;
+    const rRest = Math.max(L, W) * 1.8 + 8;
     let th = 0.7, ph = 1.15, r = rRest, drag = false, px = 0, py = 0, vth = 0, vph = 0, intro = 0;
     const upd = () => { cam.position.set(target.x + r * Math.sin(ph) * Math.sin(th), target.y + r * Math.cos(ph), target.z + r * Math.sin(ph) * Math.cos(th)); cam.lookAt(target); };
     const dom = rnd.domElement;
