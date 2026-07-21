@@ -173,7 +173,7 @@ export default function Scena3D({ cfg }) {
     key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 5;
     const s = Math.max(L, W) * 1.5;
     key.shadow.camera.left = -s; key.shadow.camera.right = s;
-    key.shadow.camera.top = s; key.shadow.camera.bottom = -4; key.shadow.bias = -0.0005;
+    key.shadow.camera.top = s; key.shadow.camera.bottom = -4; key.shadow.bias = -0.0004; key.shadow.normalBias = 0.03;
     scene.add(key);
     const fill = new THREE.DirectionalLight(0xd9e4f2, 0.26); fill.position.set(-L, hz, -W); scene.add(fill);
     const rim = new THREE.DirectionalLight(0xfff0dd, 0.5); rim.position.set(-L * 0.6, hz + hRoof + 6, -W); scene.add(rim);
