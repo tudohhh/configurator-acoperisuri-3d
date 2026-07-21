@@ -231,7 +231,7 @@ export default function Scena3D({ cfg }) {
     skyCtx.fill();
   }
   const skyTex = new THREE.CanvasTexture(skyCanvas); skyTex.colorSpace = THREE.SRGBColorSpace;
-  scene.background = skyTex;
+  scene.background = skyTex; skyTex.minFilter = THREE.LinearFilter; skyTex.magFilter = THREE.LinearFilter;
     const cam = new THREE.PerspectiveCamera(38, Wpx / Hpx, 0.1, 400);
     const rnd = new THREE.WebGLRenderer({ antialias: true });
     rnd.setPixelRatio(Math.min(window.devicePixelRatio, 2)); rnd.setSize(Wpx, Hpx);
@@ -250,16 +250,16 @@ export default function Scena3D({ cfg }) {
     bgGrad.addColorStop(0, '#87CEEB'); bgGrad.addColorStop(0.7, '#E0F6FF'); bgGrad.addColorStop(1, '#D8E2DC');
     bgCtx.fillStyle = bgGrad; bgCtx.fillRect(0, 0, 2, 512);
     const skyTex = new THREE.CanvasTexture(bgCanvas); skyTex.colorSpace = THREE.SRGBColorSpace;
-    scene.background = skyTex;
+    scene.background = skyTex; skyTex.minFilter = THREE.LinearFilter; skyTex.magFilter = THREE.LinearFilter;
   })();
-  // Dealuri
+  // Dealuri in fata
   const hillsGroup = new THREE.Group();
-  const hill1 = new THREE.Mesh(new THREE.CylinderGeometry(200, 200, 60, 32, 1, true, 0, Math.PI),
-    new THREE.MeshBasicMaterial({ color: 0x90be6d }));
-  hill1.position.set(0, -15, -40); hill1.rotation.y = Math.PI * 0.25; hillsGroup.add(hill1);
-  const hill2 = new THREE.Mesh(new THREE.CylinderGeometry(160, 160, 50, 32, 1, true, 0, Math.PI),
-    new THREE.MeshBasicMaterial({ color: 0x43aa8b }));
-  hill2.position.set(-15, -20, -30); hillsGroup.add(hill2);
+  [-1, 0, 1].forEach((sx, i) => {
+    const h = new THREE.Mesh(new THREE.ConeGeometry(25, 15, 16),
+      new THREE.MeshBasicMaterial({ color: [0x90be6d, 0x78a858, 0x43aa8b][i] }));
+    h.position.set(sx * 30, -8, -25);
+    hillsGroup.add(h);
+  });
   scene.add(hillsGroup);
     scene.fog = new THREE.Fog("#e6eae7", 55, 170);
 
