@@ -389,12 +389,26 @@ export default function Scena3D({ cfg }) {
     { const hx = -L / 4, hzp = -W / 5;
       const dyC = Math.min(Math.abs(hzp) * Math.tan(rad(panta)) + 0, hRoof);
       const hTop = (tip === "mansardat" ? yCoama : y0 + hRoof - dyC) + 1.0;
+      // Textura caramida horn
+      const hc = document.createElement('canvas'); hc.width = hc.height = 128;
+      const hx2 = hc.getContext('2d'); hx2.fillStyle = '#c9b8a0'; hx2.fillRect(0,0,128,128);
+      for (let py=0; py<128; py+=16) {
+        for (let px=(Math.floor(py/16)%2)*20; px<128; px+=40) {
+          hx2.fillStyle='rgba(0,0,0,'+(0.05+Math.random()*0.1)+')'; hx2.fillRect(px,py,18,7);
+          hx2.fillStyle='rgba(0,0,0,0.15)'; hx2.fillRect(px,py+7,18,1);
+        }
+      }
+      const ht = new THREE.CanvasTexture(hc); ht.wrapS=ht.wrapT=THREE.RepeatWrapping; ht.repeat.set(2, hTop*3);
       const horn = new THREE.Mesh(new THREE.BoxGeometry(0.75, hTop, 0.55),
-        new THREE.MeshStandardMaterial({ color: "#b8a58e", roughness: 0.95 }));
+        new THREE.MeshStandardMaterial({ map: ht, roughness: 0.85 }));
       horn.position.set(hx, hTop / 2, hzp); horn.castShadow = true; scene.add(horn);
       const cap = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.12, 0.7),
         new THREE.MeshStandardMaterial({ color: "#4d443a", roughness: 0.8 }));
-      cap.position.set(hx, hTop + 0.06, hzp); cap.castShadow = true; scene.add(cap); }
+      cap.position.set(hx, hTop + 0.06, hzp); cap.castShadow = true; scene.add(cap);
+      // Sort tabla
+      const sortH = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.03, 0.65),
+        new THREE.MeshStandardMaterial({ color: 0x3a3a3a, roughness: 0.35, metalness: 0.85 }));
+      sortH.position.set(hx, 0.02, hzp); sortH.castShadow = true; scene.add(sortH); }
 
     const target = new THREE.Vector3(0, (hz + hRoof) / 2 + 0.6, 0);
     const rRest = Math.max(L, W) * 1.35 + 6;
