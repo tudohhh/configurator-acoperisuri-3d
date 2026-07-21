@@ -511,12 +511,12 @@ export default function Scena3D({ cfg }) {
       const hc = document.createElement("canvas"); hc.width = hc.height = 512;
       const hctx = hc.getContext("2d");
       const bw = 64, bh = 32, gap = 5;
-      hctx.fillStyle = "#8d9194"; hctx.fillRect(0, 0, 512, 512);
+      hctx.fillStyle = "#7a7d80"; hctx.fillRect(0, 0, 512, 512);
       for (let row = 0; row < 512; row += bh + gap) {
         const off = (Math.floor(row / (bh + gap)) % 2) * (bw / 2 + gap / 2);
         for (let col = -bw; col < 512; col += bw + gap) {
           const x = col + off, y = row;
-          const r = 178 + (Math.random() - 0.5) * 20, g = 35 + (Math.random() - 0.5) * 10, b = 35 + (Math.random() - 0.5) * 10;
+          const r = 170 + (Math.random() - 0.5) * 35, g = 40 + (Math.random() - 0.5) * 18, b = 30 + (Math.random() - 0.5) * 18;
           hctx.fillStyle = `rgb(${r},${g},${b})`;
           hctx.fillRect(x + gap, y + gap, bw, bh);
           hctx.fillStyle = "rgba(255,255,255,0.08)"; hctx.fillRect(x + gap, y + gap, bw, bh / 3);
@@ -557,7 +557,7 @@ export default function Scena3D({ cfg }) {
       const horn = new THREE.Mesh(new THREE.BoxGeometry(0.75, hTop, 0.55),
         new THREE.MeshStandardMaterial({ map: ht, bumpMap: bt, bumpScale: 0.03, roughness: 0.85 }));
       horn.position.set(hx, hTop / 2, hzp); horn.castShadow = true; scene.add(horn);
-      const cap = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.12, 0.7),
+      const cap = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.06, 0.6),
         new THREE.MeshStandardMaterial({ color: "#4d443a", roughness: 0.8 }));
       cap.position.set(hx, hTop + 0.06, hzp); cap.castShadow = true; scene.add(cap);
       // Sort tabla
