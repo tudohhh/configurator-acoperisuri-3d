@@ -597,44 +597,6 @@ export default function Scena3D({ cfg }) {
   const vignettePass = new ShaderPass(VignetteShader);
   vignettePass.uniforms['offset'].value = 0.85;
   vignettePass.uniforms['darkness'].value = 0.5;
-  // LUT cinematic (warm filmic look)
-  const lutCanvas = document.createElement('canvas'); lutCanvas.width = 32; lutCanvas.height = 32;
-  const lctx = lutCanvas.getContext('2d');
-  const lutImg = lctx.getImageData(0, 0, 32, 32);
-  for (let i = 0; i < lutImg.data.length; i += 4) {
-    const r = lutImg.data[i], g = lutImg.data[i+1], b = lutImg.data[i+2];
-    // Crestere contrast + warmth
-    lutImg.data[i] = Math.min(255, r * 1.02);
-    lutImg.data[i+1] = Math.min(255, g * 1.01);
-    lutImg.data[i+2] = Math.min(255, b * 0.98);
-  }
-  lctx.putImageData(lutImg, 0, 0);
-  const lutTex = new THREE.CanvasTexture(lutCanvas);
-  lutTex.colorSpace = THREE.SRGBColorSpace;
-  const lutPass = new ShaderPass({
-    uniforms: { tDiffuse: { value: null }, lutMap: { value: lutTex } },
-    vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
-    fragmentShader: `
-      varying vec2 vUv;
-      uniform sampler2D tDiffuse;
-      uniform sampler2D lutMap;
-      void main() {
-        vec4 color = texture2D(tDiffuse, vUv);
-        float r = color.r * 31.0;
-        float g = color.g * 31.0;
-        float b = color.b * 31.0;
-        float bx = mod(b, 32.0);
-        float gx = mod(g, 32.0);
-        float rx = r + bx + gx * 32.0;
-        float ry = floor(b / 32.0) * 32.0 + floor(g / 32.0);
-        vec2 uv = vec2(rx / 1024.0, ry / 32.0);
-        vec3 graded = texture2D(lutMap, uv).rgb;
-        gl_FragColor = vec4(graded, color.a);
-      }
-    `
-  });
-  lutPass.renderToScreen = false;
-  composer.addPass(lutPass);
   composer.addPass(vignettePass);
   vignettePass.renderToScreen = true;
   
