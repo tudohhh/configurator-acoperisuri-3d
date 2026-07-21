@@ -294,28 +294,38 @@ export default function Scena3D({ cfg }) {
     zg.addColorStop(0, "rgba(45,40,32,0.42)"); zg.addColorStop(1, "rgba(45,40,32,0)");
     zx.fillStyle = zg; zx.fillRect(0, 0, 64, 70);
     const ztx = srgb(new THREE.CanvasTexture(zc));
-    const matZid = new THREE.MeshStandardMaterial({ map: ztx, roughness: 0.92,
-    normalMap: (() => {
-      const nc = document.createElement('canvas'); nc.width = nc.height = 256;
-      const nctx = nc.getContext('2d');
-      const nimg = nctx.getImageData(0, 0, 256, 256);
-      for (let y = 0; y < 256; y++) {
-        for (let x = 0; x < 256; x++) {
-          const i = (y*256+x)*4;
-          const n = ((x*374761393+y*668265263+1274126177)^((x*374761393+y*668265263+1274126177)>>16))/2147483648;
-          nimg.data[i] = 128 + (n-0.5)*25;
-          nimg.data[i+1] = 128 + (n-0.5)*25;
-          nimg.data[i+2] = 255; nimg.data[i+3] = 255;
-        }
-      }
-      nctx.putImageData(nimg, 0, 0);
-      const nt = new THREE.CanvasTexture(nc);
-      nt.wrapS = nt.wrapT = THREE.RepeatWrapping;
-      nt.repeat.set(4, 3); nt.colorSpace = THREE.LinearSRGBColorSpace;
-      return nt;
-    })(),
-    normalScale: new THREE.Vector2(0.25, 0.25) });
-    const casa = new THREE.Mesh(new THREE.BoxGeometry(L, hz, W), matZid);
+    // Tencuiala procedurala
+  const tencCanvas = document.createElement('canvas'); tencCanvas.width = tencCanvas.height = 512;
+  const tctx = tencCanvas.getContext('2d');
+  // Baza: alb cald
+  tctx.fillStyle = '#f4f1ea'; tctx.fillRect(0, 0, 512, 512);
+  // Granule fine
+  for (let i = 0; i < 8000; i++) {
+    const g = 235 + Math.random() * 20;
+    tctx.fillStyle = `rgba(${g},${g},${g},0.25)`;
+    tctx.fillRect(Math.random()*512, Math.random()*512, 1.5, 1.5);
+  }
+  // Imperfectiuni
+  for (let i = 0; i < 200; i++) {
+    tctx.fillStyle = `rgba(200,195,185,0.15)`;
+    tctx.fillRect(Math.random()*512, Math.random()*512, 3+Math.random()*5, 2+Math.random()*3);
+  }
+  const tencTex = new THREE.CanvasTexture(tencCanvas); tencTex.wrapS = tencTex.wrapT = THREE.RepeatWrapping;
+  tencTex.repeat.set(L*2, hz*2); tencTex.colorSpace = THREE.SRGBColorSpace;
+  // Bump map tencuiala
+  const bumpCanvas = document.createElement('canvas'); bumpCanvas.width = bumpCanvas.height = 256;
+  const bctx = bumpCanvas.getContext('2d');
+  bctx.fillStyle = '#808080'; bctx.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 4000; i++) {
+    const v = 128 + (Math.random()-0.5)*20;
+    bctx.fillStyle = `rgb(${v},${v},${v})`;
+    bctx.fillRect(Math.random()*256, Math.random()*256, 1.5, 1.5);
+  }
+  const bumpTex = new THREE.CanvasTexture(bumpCanvas); bumpTex.wrapS = bumpTex.wrapT = THREE.RepeatWrapping;
+  bumpTex.repeat.set(L*2, hz*2); bumpTex.colorSpace = THREE.LinearSRGBColorSpace;
+  const matZid = new THREE.MeshStandardMaterial({ color: '#f4f1ea', map: tencTex, roughness: 0.88,
+    bumpMap: bumpTex, bumpScale: 0.008,
+      const casa = new THREE.Mesh(new THREE.BoxGeometry(L, hz, W), matZid);
     casa.position.y = hz / 2; casa.castShadow = true; casa.receiveShadow = true; scene.add(casa);
   // Ferestre + usa
   // Ferestre + usa (PBR real)
@@ -342,8 +352,8 @@ export default function Scena3D({ cfg }) {
   const geamLat = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.95, 0.75), matGeam);
   geamLat.position.set(L / 2 + 0.05, hz * 0.55, -W * 0.35);
   scene.add(geamLat);
-    const soclu = new THREE.Mesh(new THREE.BoxGeometry(L + 0.14, 0.35, W + 0.14),
-      new THREE.MeshStandardMaterial({ color: "#8f8a80", roughness: 1 }));
+    const soclu = new THREE.Mesh(new THREE.BoxGeometry(L + 0.18, 0.4, W + 0.18),
+      new THREE.MeshStandardMaterial({ color: 0x3a3632, roughness: 0.8, bumpMap: bumpTex, bumpScale: 0.01 }));
     soclu.position.y = 0.175; soclu.receiveShadow = true; scene.add(soclu);
 
     const M = C.materialeMp[material] || Object.values(C.materialeMp)[0];
