@@ -4,6 +4,8 @@
 // Structura proiect: vezi acoperis-REPRODUCERE.txt
 import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
+import { EffectComposer, RenderPass, UnrealBloomPass, ShaderPass } from "three/addons/Addons.js";
+import { VignetteShader } from "three/addons/shaders/VignetteShader.js";
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import { CONFIG_ACOPERIS as C } from "../config/CONFIG";
 
@@ -447,10 +449,21 @@ export default function Scena3D({ cfg }) {
     dom.addEventListener("wheel", e => { e.preventDefault(); r = Math.max(6, Math.min(rRest * 2.2, r + e.deltaY * 0.02)); }, { passive: false });
 
     let raf;
-    const loop = () => {
+    const composer = new EffectComposer(rnd);
+  composer.addPass(new RenderPass(scene, cam));
+  const bloomPass = new UnrealBloomPass(new THREE.Vector2(800, 500), 0.3, 0.4, 0.85);
+  bloomPass.threshold = 0.6;
+  composer.addPass(bloomPass);
+  const vignettePass = new ShaderPass(VignetteShader);
+  vignettePass.uniforms['offset'].value = 0.5;
+  vignettePass.uniforms['darkness'].value = 0.4;
+  composer.addPass(vignettePass);
+  vignettePass.renderToScreen = true;
+  
+  const loop = () => {
       if (intro < 1) { intro = Math.min(1, intro + 0.02); const e = 1 - Math.pow(1 - intro, 3); r = rRest + (1 - e) * rRest * 0.5; th = 0.7 + (1 - e) * 0.5; }
       if (!drag) { th += vth; ph = Math.max(0.5, Math.min(1.5, ph + vph)); vth *= 0.92; vph *= 0.92; if (Math.abs(vth) < 0.0004 && intro >= 1) th += 0.0011; }
-      upd(); rnd.render(scene, cam); raf = requestAnimationFrame(loop);
+      upd(); composer.render(); raf = requestAnimationFrame(loop);
     };
     loop();
     const onR = () => { const w = el.clientWidth, h = el.clientHeight; cam.aspect = w / h; cam.updateProjectionMatrix(); rnd.setSize(w, h); };
