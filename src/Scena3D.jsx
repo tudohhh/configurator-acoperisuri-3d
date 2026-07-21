@@ -296,6 +296,32 @@ export default function Scena3D({ cfg }) {
     const matZid = new THREE.MeshStandardMaterial({ map: ztx, roughness: 0.95 });
     const casa = new THREE.Mesh(new THREE.BoxGeometry(L, hz, W), matZid);
     casa.position.y = hz / 2; casa.castShadow = true; casa.receiveShadow = true; scene.add(casa);
+  // Ferestre + usa
+  const matToc = new THREE.MeshStandardMaterial({ color: 0x3a3a3a, roughness: 0.4, metalness: 0.6 });
+  const matGeam = new THREE.MeshPhysicalMaterial({ color: 0xd8e8f0, roughness: 0.1, metalness: 0.1, clearcoat: 0.5 });
+  const matUsa = new THREE.MeshStandardMaterial({ color: 0x5a3a2a, roughness: 0.5 });
+  // Fereastra fata
+  const fereastra = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.1, 0.04), matToc);
+  fereastra.position.set(L * 0.35, hz * 0.55, W / 2 + 0.02);
+  fereastra.castShadow = true; scene.add(fereastra);
+  const geamFata = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.95, 0.01), matGeam);
+  geamFata.position.set(L * 0.35, hz * 0.55, W / 2 + 0.04);
+  scene.add(geamFata);
+  // Fereastra lateral
+  const fereastra2 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 1.1, 0.9), matToc);
+  fereastra2.position.set(L / 2 + 0.02, hz * 0.55, -W * 0.2);
+  fereastra2.castShadow = true; scene.add(fereastra2);
+  const geamLat = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.95, 0.75), matGeam);
+  geamLat.position.set(L / 2 + 0.04, hz * 0.55, -W * 0.2);
+  scene.add(geamLat);
+  // Usa
+  const usa = new THREE.Mesh(new THREE.BoxGeometry(0.65, 2.1, 0.04), matUsa);
+  usa.position.set(-L * 0.3, 1.05, W / 2 + 0.02);
+  usa.castShadow = true; scene.add(usa);
+  const clanță = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 8),
+    new THREE.MeshStandardMaterial({ color: 0xc0c0c0, roughness: 0.3, metalness: 0.95 }));
+  clanță.position.set(-L * 0.3 + 0.2, 1.1, W / 2 + 0.05);
+  scene.add(clanță);
     const soclu = new THREE.Mesh(new THREE.BoxGeometry(L + 0.14, 0.35, W + 0.14),
       new THREE.MeshStandardMaterial({ color: "#8f8a80", roughness: 1 }));
     soclu.position.y = 0.175; soclu.receiveShadow = true; scene.add(soclu);
