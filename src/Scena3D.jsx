@@ -507,16 +507,16 @@ export default function Scena3D({ cfg }) {
       const hc = document.createElement("canvas"); hc.width = hc.height = 512;
       const hctx = hc.getContext("2d");
       const bw = 64, bh = 32, gap = 5;
-      hctx.fillStyle = "#7a7d80"; hctx.fillRect(0, 0, 512, 512);
+      hctx.fillStyle = "#6a6d70"; hctx.fillRect(0, 0, 512, 512);
       for (let row = 0; row < 512; row += bh + gap) {
         const off = (Math.floor(row / (bh + gap)) % 2) * (bw / 2 + gap / 2);
         for (let col = -bw; col < 512; col += bw + gap) {
           const x = col + off, y = row;
-          const r = 170 + (Math.random() - 0.5) * 35, g = 40 + (Math.random() - 0.5) * 18, b = 30 + (Math.random() - 0.5) * 18;
+          const r = 130 + (Math.random() - 0.5) * 25, g = 45 + (Math.random() - 0.5) * 12, b = 35 + (Math.random() - 0.5) * 12;
           hctx.fillStyle = `rgb(${r},${g},${b})`;
           hctx.fillRect(x + gap, y + gap, bw, bh);
-          hctx.fillStyle = "rgba(255,255,255,0.08)"; hctx.fillRect(x + gap, y + gap, bw, bh / 3);
-          hctx.fillStyle = "rgba(0,0,0,0.1)"; hctx.fillRect(x + gap, y + gap + bh * 0.7, bw, bh * 0.3);
+          hctx.fillStyle = "rgba(255,255,255,0.04)"; hctx.fillRect(x + gap, y + gap, bw, bh / 3);
+          hctx.fillStyle = "rgba(0,0,0,0.18)"; hctx.fillRect(x + gap, y + gap + bh * 0.7, bw, bh * 0.3);
         }
       }
       const ht = new THREE.CanvasTexture(hc); ht.wrapS = ht.wrapT = THREE.RepeatWrapping; ht.repeat.set(2, hTop * 6);
