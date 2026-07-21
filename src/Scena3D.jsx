@@ -322,10 +322,12 @@ export default function Scena3D({ cfg }) {
   normalTex.wrapS = normalTex.wrapT = THREE.RepeatWrapping;
   normalTex.colorSpace = THREE.LinearSRGBColorSpace;
   
-  const matInv = new THREE.MeshStandardMaterial({
+  const matInv = new THREE.MeshPhysicalMaterial({
       color: 0xffffff, map: TX.map, bumpMap: TX.bump, bumpScale: M.tex === "tigla" ? 0.035 : 0.02,
       roughness: M.tex === "tigla" ? 0.8 : 0.35, metalness: M.tex === "tigla" ? 0.02 : 0.5, side: THREE.DoubleSide,
       normalMap: normalTex, normalScale: new THREE.Vector2(0.5, 0.5),
+      clearcoat: M.tex === "tabla" ? 0.3 : 0.0,
+      clearcoatRoughness: 0.25,
     });
     const matSub = new THREE.MeshStandardMaterial({ color: "#33302c", roughness: 0.9, side: THREE.DoubleSide });
     const y0 = hz, x0 = L / 2 + ov, z0 = W / 2 + ov, yv = y0 + hRoof + (ov * Math.tan(rad(panta)));
