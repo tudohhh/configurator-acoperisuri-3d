@@ -406,6 +406,15 @@ export default function Scena3D({ cfg }) {
   coamaMesh.position.set(0, yv + 0.03, 0);
   coamaMesh.castShadow = true;
   scene.add(coamaMesh);
+
+  // Streașină
+  const matStreasina = new THREE.MeshStandardMaterial({ color: shade(M.hex, 0.5), roughness: 0.5, metalness: 0.15 });
+  [-1, 1].forEach(s => {
+    const str = new THREE.Mesh(new THREE.BoxGeometry(L + 0.15, 0.03, 0.08), matStreasina);
+    str.position.set(0, y0 - 0.02, z0 * s);
+    str.castShadow = true;
+    scene.add(str);
+  });
     const matJ = new THREE.MeshStandardMaterial({ color: "#70767c", metalness: 0.6, roughness: 0.35 });
     const bordura = (w, x, z, rotY = 0) => {
       const p = new THREE.Mesh(new THREE.BoxGeometry(w, 0.22, 0.06), matPazie);
