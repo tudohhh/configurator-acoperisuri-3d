@@ -604,9 +604,9 @@ export default function Scena3D({ cfg }) {
   for (let i = 0; i < lutImg.data.length; i += 4) {
     const r = lutImg.data[i], g = lutImg.data[i+1], b = lutImg.data[i+2];
     // Crestere contrast + warmth
-    lutImg.data[i] = Math.min(255, r * 1.05);
-    lutImg.data[i+1] = Math.min(255, g * 1.02);
-    lutImg.data[i+2] = Math.min(255, b * 0.95);
+    lutImg.data[i] = Math.min(255, r * 1.02);
+    lutImg.data[i+1] = Math.min(255, g * 1.01);
+    lutImg.data[i+2] = Math.min(255, b * 0.98);
   }
   lctx.putImageData(lutImg, 0, 0);
   const lutTex = new THREE.CanvasTexture(lutCanvas);
