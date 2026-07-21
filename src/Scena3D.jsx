@@ -397,6 +397,15 @@ export default function Scena3D({ cfg }) {
       m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir.normalize());
       m.castShadow = true; scene.add(m);
     };
+
+  // Coamă
+  const matCoama = new THREE.MeshStandardMaterial({ color: shade(M.hex, 0.5), roughness: 0.45, metalness: 0.2 });
+  const coamaGeo = new THREE.CylinderGeometry(0.05, 0.05, L, 8);
+  coamaGeo.rotateZ(Math.PI / 2);
+  const coamaMesh = new THREE.Mesh(coamaGeo, matCoama);
+  coamaMesh.position.set(0, yv + 0.03, 0);
+  coamaMesh.castShadow = true;
+  scene.add(coamaMesh);
     const matJ = new THREE.MeshStandardMaterial({ color: "#70767c", metalness: 0.6, roughness: 0.35 });
     const bordura = (w, x, z, rotY = 0) => {
       const p = new THREE.Mesh(new THREE.BoxGeometry(w, 0.22, 0.06), matPazie);
