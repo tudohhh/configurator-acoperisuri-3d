@@ -302,9 +302,30 @@ export default function Scena3D({ cfg }) {
 
     const M = C.materialeMp[material] || Object.values(C.materialeMp)[0];
     const TX = texInvelitoare(M.hex, M.tex || "tabla");
-    const matInv = new THREE.MeshStandardMaterial({
+    // Normal map procedural pentru acoperis
+  const normalCanvas = document.createElement('canvas'); normalCanvas.width = normalCanvas.height = 256;
+  const nctx = normalCanvas.getContext('2d');
+  const nimg = nctx.getImageData(0, 0, 256, 256);
+  for (let y = 0; y < 256; y++) {
+    for (let x = 0; x < 256; x++) {
+      const i = (y * 256 + x) * 4;
+      const stripe = Math.sin(y / 256 * 60) * 0.5 + 0.5;
+      const noise = ((x * 374761393 + y * 668265263 + 1274126177) ^ ((x * 374761393 + y * 668265263 + 1274126177) >> 16)) / 2147483648;
+      nimg.data[i] = 128 + (stripe + noise - 0.5) * 180;
+      nimg.data[i+1] = 128 + noise * 35;
+      nimg.data[i+2] = 255;
+      nimg.data[i+3] = 255;
+    }
+  }
+  nctx.putImageData(nimg, 0, 0);
+  const normalTex = new THREE.CanvasTexture(normalCanvas);
+  normalTex.wrapS = normalTex.wrapT = THREE.RepeatWrapping;
+  normalTex.colorSpace = THREE.LinearSRGBColorSpace;
+  
+  const matInv = new THREE.MeshStandardMaterial({
       color: 0xffffff, map: TX.map, bumpMap: TX.bump, bumpScale: M.tex === "tigla" ? 0.035 : 0.02,
       roughness: M.tex === "tigla" ? 0.8 : 0.35, metalness: M.tex === "tigla" ? 0.02 : 0.5, side: THREE.DoubleSide,
+      normalMap: normalTex, normalScale: new THREE.Vector2(0.5, 0.5),
     });
     const matSub = new THREE.MeshStandardMaterial({ color: "#33302c", roughness: 0.9, side: THREE.DoubleSide });
     const y0 = hz, x0 = L / 2 + ov, z0 = W / 2 + ov, yv = y0 + hRoof + (ov * Math.tan(rad(panta)));
