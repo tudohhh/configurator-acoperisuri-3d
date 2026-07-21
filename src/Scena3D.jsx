@@ -334,13 +334,13 @@ export default function Scena3D({ cfg }) {
   scene.add(geamFata);
   // Fereastra laterala cu pervaz
   const pervaz2 = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 1.0), matToc);
-  pervaz2.position.set(L / 2 + 0.03, hz * 0.55 - 0.55, -W * 0.2);
+  pervaz2.position.set(L / 2 + 0.03, hz * 0.55 - 0.55, -W * 0.35);
   pervaz2.castShadow = true; scene.add(pervaz2);
   const fereastra2 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.1, 0.9), matToc);
-  fereastra2.position.set(L / 2 + 0.02, hz * 0.55, -W * 0.2);
+  fereastra2.position.set(L / 2 + 0.02, hz * 0.55, -W * 0.35);
   fereastra2.castShadow = true; scene.add(fereastra2);
   const geamLat = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.95, 0.75), matGeam);
-  geamLat.position.set(L / 2 + 0.05, hz * 0.55, -W * 0.2);
+  geamLat.position.set(L / 2 + 0.05, hz * 0.55, -W * 0.35);
   scene.add(geamLat);
   // Usa cu prag
   const prag = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.04, 0.08), matToc);
@@ -567,7 +567,7 @@ export default function Scena3D({ cfg }) {
       const horn = new THREE.Mesh(new THREE.BoxGeometry(0.75, hTop, 0.55),
         new THREE.MeshStandardMaterial({ map: ht, bumpMap: bt, bumpScale: 0.03, roughness: 0.85 }));
       horn.position.set(hx, hTop / 2, hzp); horn.castShadow = true; scene.add(horn);
-      const cap = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.06, 0.6),
+      const cap = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.04, 0.58),
         new THREE.MeshStandardMaterial({ color: "#4d443a", roughness: 0.8 }));
       cap.position.set(hx, hTop + 0.06, hzp); cap.castShadow = true; scene.add(cap);
       // Sort tabla
