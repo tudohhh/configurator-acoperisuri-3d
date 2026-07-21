@@ -252,15 +252,13 @@ export default function Scena3D({ cfg }) {
     const skyTex = new THREE.CanvasTexture(bgCanvas); skyTex.colorSpace = THREE.SRGBColorSpace;
     scene.background = skyTex; skyTex.minFilter = THREE.LinearFilter; skyTex.magFilter = THREE.LinearFilter;
   })();
-  // Dealuri in fata
-  const hillsGroup = new THREE.Group();
-  [-1, 0, 1].forEach((sx, i) => {
-    const h = new THREE.Mesh(new THREE.ConeGeometry(25, 15, 16),
-      new THREE.MeshBasicMaterial({ color: [0x90be6d, 0x78a858, 0x43aa8b][i] }));
-    h.position.set(sx * 30, -8, -25);
-    hillsGroup.add(h);
-  });
-  scene.add(hillsGroup);
+  // Dealuri PlaneGeometry (DoubleSide)
+  const hill1 = new THREE.Mesh(new THREE.PlaneGeometry(120, 40),
+    new THREE.MeshBasicMaterial({ color: 0x8cb369, side: THREE.DoubleSide }));
+  hill1.position.set(0, 5, -50); scene.add(hill1);
+  const hill2 = new THREE.Mesh(new THREE.PlaneGeometry(100, 30),
+    new THREE.MeshBasicMaterial({ color: 0x4d908e, side: THREE.DoubleSide }));
+  hill2.position.set(-15, 2, -30); scene.add(hill2);
     scene.fog = new THREE.Fog("#e6eae7", 55, 170);
 
     const teren = new THREE.Mesh(new THREE.PlaneGeometry(320, 320),
