@@ -236,7 +236,8 @@ export default function Scena3D({ cfg }) {
     rnd.shadowMap.enabled = true; rnd.shadowMap.type = THREE.PCFSoftShadowMap;
     if ("outputColorSpace" in rnd) rnd.outputColorSpace = THREE.SRGBColorSpace;
     else rnd.outputEncoding = THREE.sRGBEncoding;
-    rnd.toneMapping = THREE.ACESFilmicToneMapping; rnd.toneMappingExposure = 1.06;
+    rnd.toneMapping = THREE.ACESFilmicToneMapping;
+  rnd.toneMappingExposure = 1.4; rnd.toneMappingExposure = 1.06;
     el.appendChild(rnd.domElement);
 
     scene.background = texCer();
@@ -303,7 +304,7 @@ export default function Scena3D({ cfg }) {
     const TX = texInvelitoare(M.hex, M.tex || "tabla");
     const matInv = new THREE.MeshStandardMaterial({
       color: 0xffffff, map: TX.map, bumpMap: TX.bump, bumpScale: M.tex === "tigla" ? 0.035 : 0.02,
-      roughness: M.tex === "tigla" ? 0.8 : 0.5, metalness: M.tex === "tigla" ? 0.02 : 0.3, side: THREE.DoubleSide,
+      roughness: M.tex === "tigla" ? 0.8 : 0.35, metalness: M.tex === "tigla" ? 0.02 : 0.5, side: THREE.DoubleSide,
     });
     const matSub = new THREE.MeshStandardMaterial({ color: "#33302c", roughness: 0.9, side: THREE.DoubleSide });
     const y0 = hz, x0 = L / 2 + ov, z0 = W / 2 + ov, yv = y0 + hRoof + (ov * Math.tan(rad(panta)));
@@ -464,12 +465,12 @@ export default function Scena3D({ cfg }) {
     let raf;
     const composer = new EffectComposer(rnd);
   composer.addPass(new RenderPass(scene, cam));
-  const bloomPass = new UnrealBloomPass(new THREE.Vector2(800, 500), 0.3, 0.4, 0.85);
-  bloomPass.threshold = 0.6;
+  const bloomPass = new UnrealBloomPass(new THREE.Vector2(800, 500), 0.5, 0.3, 0.9);
+  bloomPass.threshold = 0.85;
   composer.addPass(bloomPass);
   const vignettePass = new ShaderPass(VignetteShader);
-  vignettePass.uniforms['offset'].value = 0.5;
-  vignettePass.uniforms['darkness'].value = 0.4;
+  vignettePass.uniforms['offset'].value = 0.85;
+  vignettePass.uniforms['darkness'].value = 0.5;
   composer.addPass(vignettePass);
   vignettePass.renderToScreen = true;
   
