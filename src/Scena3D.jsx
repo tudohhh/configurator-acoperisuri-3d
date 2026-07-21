@@ -230,11 +230,25 @@ export default function Scena3D({ cfg }) {
   envTex.mapping = THREE.EquirectangularReflectionMapping;
   envTex.colorSpace = THREE.SRGBColorSpace;
   scene.environment = envTex;
-  scene.background = new THREE.Color('#dce8f0');
+  // Cer cu gradient
+  const skyCanvas = document.createElement('canvas'); skyCanvas.width = 512; skyCanvas.height = 512;
+  const skyCtx = skyCanvas.getContext('2d');
+  const skyGrad = skyCtx.createLinearGradient(0, 0, 0, 512);
+  skyGrad.addColorStop(0, '#b8d4f0'); skyGrad.addColorStop(0.4, '#dce8f0'); skyGrad.addColorStop(0.7, '#e8e4d8'); skyGrad.addColorStop(1, '#d5cec0');
+  skyCtx.fillStyle = skyGrad; skyCtx.fillRect(0, 0, 512, 512);
+  // Nori subtiri
+  for (let i = 0; i < 15; i++) {
+    skyCtx.fillStyle = 'rgba(255,255,255,0.12)';
+    skyCtx.beginPath();
+    skyCtx.ellipse(100 + Math.random()*312, 50 + Math.random()*100, 30+Math.random()*60, 8+Math.random()*15, Math.random()*0.5, 0, Math.PI*2);
+    skyCtx.fill();
+  }
+  const skyTex = new THREE.CanvasTexture(skyCanvas); skyTex.colorSpace = THREE.SRGBColorSpace;
+  scene.background = skyTex;
     const cam = new THREE.PerspectiveCamera(38, Wpx / Hpx, 0.1, 400);
     const rnd = new THREE.WebGLRenderer({ antialias: true });
     rnd.setPixelRatio(Math.min(window.devicePixelRatio, 2)); rnd.setSize(Wpx, Hpx);
-    rnd.shadowMap.enabled = true; rnd.shadowMap.type = THREE.PCFSoftShadowMap;
+    rnd.shadowMap.enabled = true; rnd.shadowMap.type = THREE.PCFSoftShadowMap; rnd.shadowMap.autoUpdate = false;
     if ("outputColorSpace" in rnd) rnd.outputColorSpace = THREE.SRGBColorSpace;
     else rnd.outputEncoding = THREE.sRGBEncoding;
     rnd.toneMapping = THREE.ACESFilmicToneMapping;
@@ -251,7 +265,25 @@ export default function Scena3D({ cfg }) {
       new THREE.MeshStandardMaterial({ color: "#c7c2b5", roughness: 0.95 }));
     apron.rotation.x = -Math.PI / 2; apron.position.y = 0.012; apron.receiveShadow = true; scene.add(apron);
     const bordT = new THREE.Mesh(new THREE.PlaneGeometry(L + 3.9, W + 3.9),
-      new THREE.MeshStandardMaterial({ color: "#a8a691", roughness: 1, transparent: true, opacity: 0.55 }));
+      (() => {
+    const ac = document.createElement('canvas'); ac.width = 256; ac.height = 256;
+    const actx = ac.getContext('2d');
+    actx.fillStyle = '#b0a898'; actx.fillRect(0, 0, 256, 256);
+    for (let i = 0; i < 2000; i++) {
+      actx.fillStyle = `rgba(${140+Math.random()*40},${130+Math.random()*40},${120+Math.random()*40},0.4)`;
+      actx.fillRect(Math.random()*256, Math.random()*256, 3+Math.random()*8, 3+Math.random()*8);
+    }
+    // Linii de dale
+    for (let x = 0; x < 256; x += 32) {
+      actx.fillStyle = 'rgba(0,0,0,0.1)'; actx.fillRect(x, 0, 1, 256);
+    }
+    for (let y = 0; y < 256; y += 32) {
+      actx.fillStyle = 'rgba(0,0,0,0.1)'; actx.fillRect(0, y, 256, 1);
+    }
+    const at = new THREE.CanvasTexture(ac); at.wrapS = at.wrapT = THREE.RepeatWrapping;
+    at.repeat.set(4, 4); at.colorSpace = THREE.SRGBColorSpace;
+    return new THREE.MeshStandardMaterial({ map: at, roughness: 0.75, transparent: true, opacity: 0.55 });
+  })());
     bordT.rotation.x = -Math.PI / 2; bordT.position.y = 0.008; bordT.receiveShadow = true; scene.add(bordT);
     const alee = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 7),
       new THREE.MeshStandardMaterial({ color: "#bdb7a9", roughness: 0.95 }));
@@ -279,7 +311,7 @@ export default function Scena3D({ cfg }) {
     scene.add(new THREE.HemisphereLight(0xfdf3e3, 0x7f8a74, 0.38));
     const key = new THREE.DirectionalLight(0xffe9cf, 2.1);
     key.position.set(L * 1.7, hz + hRoof + 6.5, W * 0.3); key.castShadow = true;
-    key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 5;
+    key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 8;
     const s = Math.max(L, W) * 1.5;
     key.shadow.camera.left = -s; key.shadow.camera.right = s;
     key.shadow.camera.top = s; key.shadow.camera.bottom = -4; key.shadow.bias = -0.00015; key.shadow.normalBias = 0.04;
