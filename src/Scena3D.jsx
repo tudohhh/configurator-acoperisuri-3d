@@ -4,50 +4,9 @@
 // Structura proiect: vezi acoperis-REPRODUCERE.txt
 import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
-import { EffectComposer, RenderPass, UnrealBloomPass, ShaderPass } from "three/addons/Addons.js";
-import { SSAOPass } from "three/addons/postprocessing/SSAOPass.js";
-import { VignetteShader } from "three/addons/shaders/VignetteShader.js";
 import { CONFIG_ACOPERIS as C } from "../config/CONFIG";
 
-function createNormalMap(size = 256) {
-  const c = document.createElement('canvas');
-  c.width = size; c.height = size;
-  const ctx = c.getContext('2d');
-  const img = ctx.getImageData(0, 0, size, size);
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const i = (y * size + x) * 4;
-      const stripe = Math.sin(y / size * 60) * 0.5 + 0.5;
-      const n = hashNoise(x * 0.5, y * 0.5) * 0.25;
-      img.data[i] = 128 + (stripe + n - 0.5) * 180;
-      img.data[i+1] = 128 + hashNoise(y, x) * 35;
-      img.data[i+2] = 255;
-      img.data[i+3] = 255;
-    }
-  }
-  ctx.putImageData(img, 0, 0);
-  const t = new THREE.CanvasTexture(c);
-  t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.colorSpace = THREE.LinearSRGBColorSpace;
-  return t;
-}
 
-function createRoughnessMap(size = 256) {
-  const c = document.createElement('canvas');
-  c.width = size; c.height = size;
-  const ctx = c.getContext('2d');
-  const img = ctx.getImageData(0, 0, size, size);
-  for (let i = 0; i < img.data.length; i += 4) {
-    const v = 150 + hashNoise(i/4%size, Math.floor(i/4/size)) * 25;
-    img.data[i] = img.data[i+1] = img.data[i+2] = v;
-    img.data[i+3] = 255;
-  }
-  ctx.putImageData(img, 0, 0);
-  const t = new THREE.CanvasTexture(c);
-  t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.colorSpace = THREE.LinearSRGBColorSpace;
-  return t;
-}
 
 
 
@@ -243,23 +202,22 @@ export default function Scena3D({ cfg }) {
     rnd.setClearColor(0xdce8f0);
     el.appendChild(rnd.domElement);
 
-    // Fundal: cer cu gradient + dealuri
-  (() => {
-    const bgCanvas = document.createElement('canvas'); bgCanvas.width = 2; bgCanvas.height = 512;
-    const bgCtx = bgCanvas.getContext('2d');
-    const bgGrad = bgCtx.createLinearGradient(0, 0, 0, 512);
-    bgGrad.addColorStop(0, '#87CEEB'); bgGrad.addColorStop(0.7, '#E0F6FF'); bgGrad.addColorStop(1, '#D8E2DC');
-    bgCtx.fillStyle = bgGrad; bgCtx.fillRect(0, 0, 2, 512);
-    const skyTex = new THREE.CanvasTexture(bgCanvas); skyTex.colorSpace = THREE.SRGBColorSpace;
-    scene.background = skyTex; skyTex.minFilter = THREE.LinearFilter; skyTex.magFilter = THREE.LinearFilter;
+    // Dealuri cetoase in departare (se topesc in ceata)
+  (function(){
+    const c=document.createElement('canvas'); c.width=1024; c.height=256; const x=c.getContext('2d');
+    for(let layer=1;layer>=0;layer--){
+      const baseY=95+layer*38, amp=32-layer*12, col=layer===0?'#8ba06d':'#a3b090';
+      x.beginPath(); x.moveTo(0,256);
+      for(let px=0;px<=1024;px+=14){ const y=baseY+Math.sin(px*0.008+layer*2.3)*amp+Math.sin(px*0.021+layer)*11; x.lineTo(px,y); }
+      x.lineTo(1024,256); x.closePath();
+      const g=x.createLinearGradient(0,baseY-amp,0,256);
+      g.addColorStop(0,'rgba(230,234,231,0.95)'); g.addColorStop(1,col);
+      x.fillStyle=g; x.globalAlpha=layer===0?1:0.8; x.fill();
+    }
+    const t=new THREE.CanvasTexture(c); if("colorSpace" in t)t.colorSpace=THREE.SRGBColorSpace;
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(320,80), new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false,fog:false}));
+    m.position.set(0,22,-95); scene.add(m);
   })();
-  // Dealuri PlaneGeometry (DoubleSide)
-  const hill1 = new THREE.Mesh(new THREE.PlaneGeometry(120, 40),
-    new THREE.MeshBasicMaterial({ color: 0x8cb369, side: THREE.DoubleSide }));
-  hill1.position.set(0, 5, -50); scene.add(hill1);
-  const hill2 = new THREE.Mesh(new THREE.PlaneGeometry(100, 30),
-    new THREE.MeshBasicMaterial({ color: 0x4d908e, side: THREE.DoubleSide }));
-  hill2.position.set(-15, 2, -30); scene.add(hill2);
     scene.fog = new THREE.Fog("#e6eae7", 55, 170);
 
     const teren = new THREE.Mesh(new THREE.PlaneGeometry(320, 320),
@@ -317,7 +275,7 @@ export default function Scena3D({ cfg }) {
         new THREE.MeshStandardMaterial({ color: "#66754f", roughness: 1 }));
       co.scale.y = 0.85; co.position.set(L / 2 + 5, 1.2 * s2 + 0.95 * s2, W / 2 + 1); co.castShadow = true; scene.add(co); }
 
-    scene.add(new THREE.HemisphereLight(0xfdf3e3, 0x7f8a74, 0.38));
+    scene.add(new THREE.HemisphereLight(0xfdf3e3, 0x8a9480, 0.75));
     const key = new THREE.DirectionalLight(0xffe9cf, 2.1);
     key.position.set(L * 1.7, hz + hRoof + 6.5, W * 0.3); key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 8;
@@ -325,7 +283,7 @@ export default function Scena3D({ cfg }) {
     key.shadow.camera.left = -s; key.shadow.camera.right = s;
     key.shadow.camera.top = s; key.shadow.camera.bottom = -4; key.shadow.bias = -0.00015; key.shadow.normalBias = 0.04;
     scene.add(key);
-    const fill = new THREE.DirectionalLight(0xd9e4f2, 0.26); fill.position.set(-L, hz, -W); scene.add(fill);
+    const fill = new THREE.DirectionalLight(0xd9e4f2, 0.5); fill.position.set(-L, hz, -W); scene.add(fill);
     const rim = new THREE.DirectionalLight(0xfff0dd, 0.5); rim.position.set(-L * 0.6, hz + hRoof + 6, -W); scene.add(rim);
 
     const zc = document.createElement("canvas"); zc.width = 64; zc.height = 256;
@@ -573,23 +531,6 @@ export default function Scena3D({ cfg }) {
         }
       }
       const bt = new THREE.CanvasTexture(bc); bt.wrapS = bt.wrapT = THREE.RepeatWrapping; bt.repeat.set(2, hTop * 6);
-  // Coama (element fizic pe muchie)
-  const matCoama = new THREE.MeshStandardMaterial({ color: shade(M.hex, 0.5), roughness: 0.45, metalness: 0.2 });
-  const coamaGeo = new THREE.CylinderGeometry(0.05, 0.05, L, 8);
-  coamaGeo.rotateZ(Math.PI / 2);
-  const coamaMesh = new THREE.Mesh(coamaGeo, matCoama);
-  coamaMesh.position.set(0, yv + 0.03, 0);
-  coamaMesh.castShadow = true;
-  scene.add(coamaMesh);
-
-  // Streașină față/spate
-  const matStreasina = new THREE.MeshStandardMaterial({ color: shade(M.hex, 0.5), roughness: 0.5, metalness: 0.15 });
-  [-1, 1].forEach(s => {
-    const str = new THREE.Mesh(new THREE.BoxGeometry(L + 0.15, 0.03, 0.08), matStreasina);
-    str.position.set(0, y0 - 0.02, z0 * s);
-    str.castShadow = true;
-    scene.add(str);
-  });
 
       const horn = new THREE.Mesh(new THREE.BoxGeometry(0.75, hTop, 0.55),
         new THREE.MeshStandardMaterial({ map: ht, bumpMap: bt, bumpScale: 0.03, roughness: 0.85 }));
@@ -619,28 +560,10 @@ export default function Scena3D({ cfg }) {
     dom.addEventListener("wheel", e => { e.preventDefault(); r = Math.max(6, Math.min(rRest * 2.2, r + e.deltaY * 0.02)); }, { passive: false });
 
     let raf;
-    const composer = new EffectComposer(rnd);
-  composer.addPass(new RenderPass(scene, cam));
-  // SSAO - occluzie ambientala
-  const ssaoPass = new SSAOPass(scene, cam, 800, 500);
-  ssaoPass.kernelRadius = 12;
-  ssaoPass.minDistance = 0.005;
-  ssaoPass.maxDistance = 0.1;
-  ssaoPass.output = 0; // 0 = SSAO only, blend in shader
-  composer.addPass(ssaoPass);
-  const bloomPass = new UnrealBloomPass(new THREE.Vector2(800, 500), 0.5, 0.3, 0.9);
-  bloomPass.threshold = 0.85;
-  composer.addPass(bloomPass);
-  const vignettePass = new ShaderPass(VignetteShader);
-  vignettePass.uniforms['offset'].value = 0.85;
-  vignettePass.uniforms['darkness'].value = 0.5;
-  composer.addPass(vignettePass);
-  vignettePass.renderToScreen = true;
-  
-  const loop = () => {
+    const loop = () => {
       if (intro < 1) { intro = Math.min(1, intro + 0.02); const e = 1 - Math.pow(1 - intro, 3); r = rRest + (1 - e) * rRest * 0.5; th = 0.7 + (1 - e) * 0.5; }
       if (!drag) { th += vth; ph = Math.max(0.5, Math.min(1.5, ph + vph)); vth *= 0.92; vph *= 0.92; if (Math.abs(vth) < 0.0004 && intro >= 1) th += 0.0011; }
-      upd(); composer.render(); raf = requestAnimationFrame(loop);
+      upd(); rnd.render(scene, cam); raf = requestAnimationFrame(loop);
     };
     loop();
     const onR = () => { const w = el.clientWidth, h = el.clientHeight; cam.aspect = w / h; cam.updateProjectionMatrix(); rnd.setSize(w, h); };
