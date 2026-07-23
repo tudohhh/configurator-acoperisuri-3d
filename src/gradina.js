@@ -268,7 +268,7 @@ function texMacro() {
 /* ---------- solul: detaliu fin + macro + stingere spre orizont ---------- */
 function faSol(latura, razaPlata) {
   const G = texGazon();
-  const rep = latura / 3.2;
+  const rep = latura / 12.0;
   G.map.repeat.set(rep, rep);
   G.bump.repeat.set(rep, rep);
   const mac = texMacro();
@@ -279,62 +279,65 @@ function faSol(latura, razaPlata) {
     // Nu e citit direct: codul de mai jos il inlocuieste cu dala rotita.
     map: G.map,
     bumpMap: G.bump,
-    bumpScale: 0.035,
+    bumpScale: 0.12,
     roughness: 1,
     metalness: 0,
   });
 
   mat.onBeforeCompile = (sh) => {
     sh.uniforms.uMacro = { value: mac };
-    sh.uniforms.uDetaliu = { value: G.map };
-    sh.vertexShader =
-      "varying vec3 vWPos;\n" +
-      sh.vertexShader.replace(
-        "#include <begin_vertex>",
-        "#include <begin_vertex>\n  vWPos = (modelMatrix * vec4(transformed, 1.0)).xyz;"
-      );
-    sh.fragmentShader =
-      `uniform sampler2D uMacro;
-       uniform sampler2D uDetaliu;
-       varying vec3 vWPos;
+    sh.uniforms.uDet = { value: G.map };
 
-       // zgomot ieftin, doar ca sa alegem un unghi pe zona
-       float zg(vec2 p) {
-         return fract(sin(dot(floor(p), vec2(127.1, 311.7))) * 43758.5453);
-       }
+    // ATENTIE: uniformele si functiile NU se pun inaintea shaderului. Prefixul
+    // three contine `precision`, iar orice `float` declarat mai devreme e
+    // eroare de compilare — de aceea iesea o pata verde. Locul lor e dupa
+    // <include common>, unde precizia e deja declarata.
+    sh.vertexShader = sh.vertexShader.replace(
+      "#include <common>",
+      "#include <common>\n varying vec3 vWPos;"
+    );
+    sh.vertexShader = sh.vertexShader.replace(
+      "#include <begin_vertex>",
+      "#include <begin_vertex>\n vWPos = (modelMatrix * vec4(transformed,1.0)).xyz;"
+    );
 
-       // Dala rotita pe zone. Ochiul recunoaste instant un tipar repetat,
-       // dar nu unul repetat SI rotit altfel la fiecare zona.
-       vec3 dalaRotita(vec2 uv, float marimeZona) {
-         vec2 zona = uv / marimeZona;
-         float a = zg(zona) * 6.2831;
-         float ca = cos(a), sa = sin(a);
-         vec2 centru = (floor(zona) + 0.5) * marimeZona;
-         vec2 d = uv - centru;
-         vec2 rot = vec2(d.x * ca - d.y * sa, d.x * sa + d.y * ca) + centru;
-         return texture2D(uDetaliu, rot).rgb;
-       }
-       ` +
-      sh.fragmentShader.replace(
-        "#include <map_fragment>",
-        `vec2 wxz = vWPos.xz;
+    sh.fragmentShader = sh.fragmentShader.replace(
+      "#include <common>",
+      `#include <common>
+       uniform sampler2D uMacro;
+       uniform sampler2D uDet;
+       varying vec3 vWPos;`
+    );
 
-         // doua scari ale detaliului, cu perioade care nu se divid una pe alta:
-         // cea mica pentru aproape, cea mare pentru departe
-         vec3 aproape = dalaRotita(wxz / 3.2, 7.0);
-         vec3 departe = dalaRotita(wxz / 11.3, 3.0);
-         float dOriz = length(wxz);
-         vec3 baza = mix(aproape, departe, smoothstep(18.0, 70.0, dOriz));
+    sh.fragmentShader = sh.fragmentShader.replace(
+      "#include <map_fragment>",
+      `vec2 wxz = vWPos.xz;
+       float dOriz = length(wxz);
 
-         // doua scari de macro-variatie, tot cu perioade neinrudite:
-         // cu una singura, dalele se realiniaza cu ea si grila reapare
-         vec3 m1 = texture2D(uMacro, wxz * 0.0075).rgb;
-         vec3 m2 = texture2D(uMacro, wxz * 0.0286 + vec2(0.37, 0.61)).rgb;
-         baza *= (0.52 + m1 * 0.62) * (0.72 + m2 * 0.52);
+       // 1. DEFORMARE UV: coordonatele se deplaseaza cu un zgomot lent inainte
+       //    de citire. Grila nu mai e dreapta nicaieri, deci nu exista aliniere
+       //    de recunoscut. Spre deosebire de dalele rotite, deformarea e
+       //    continua, deci nu apar cusaturi la marginea zonelor.
+       vec2 wp  = (vec2(texture2D(uMacro, wxz * 0.0090).r,
+                        texture2D(uMacro, wxz * 0.0090 + vec2(0.5)).r) - 0.5) * 3.4;
+       vec2 wp2 = (vec2(texture2D(uMacro, wxz * 0.0031).r,
+                        texture2D(uMacro, wxz * 0.0031 + vec2(0.5)).r) - 0.5) * 9.0;
 
-         baza = mix(baza, vec3(0.575, 0.60, 0.545), smoothstep(45.0, 200.0, dOriz));
-         diffuseColor.rgb *= baza;`
-      );
+       // 2. DOUA SCARI: dala de 12 m aproape, de 42 m departe. Perioadele nu
+       //    se divid una pe alta, deci nu se pot suprapune.
+       vec3 baza = texture2D(uDet, (wxz + wp) / 12.0).rgb;
+       vec3 dep  = texture2D(uDet, (wxz + wp2) / 42.36).rgb;
+       baza = mix(baza, dep, smoothstep(18.0, 80.0, dOriz));
+
+       // 3. DOUA SCARI DE MACRO, la 33 m si 11 m, decalate. Cu una singura,
+       //    dalele se realiniaza cu ea si grila reapare in departare.
+       vec3 m1 = texture2D(uMacro, wxz * 0.03000).rgb;
+       vec3 m2 = texture2D(uMacro, wxz * 0.09000 + vec2(0.37, 0.61)).rgb;
+       baza *= (0.00 + m1 * 1.00) * (0.30 + m2 * 0.70);
+
+       baza = mix(baza, vec3(0.575, 0.60, 0.545), smoothstep(45.0, 260.0, dOriz));
+       diffuseColor.rgb *= baza;`
+    );
     mat.userData.sh = sh;
   };
 
