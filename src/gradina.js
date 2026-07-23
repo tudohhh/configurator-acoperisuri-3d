@@ -167,11 +167,19 @@ function texGazon() {
   const c = document.createElement("canvas");
   c.width = c.height = S;
   const x = c.getContext("2d");
-  x.fillStyle = "#5b6944";
-  x.fillRect(0, 0, S, S);
+  // canvas separat pentru relief: alb = fir ridicat, negru = pamant
+  const b = document.createElement("canvas");
+  b.width = b.height = S;
+  const bx = b.getContext("2d");
 
-  const tonuri = ["#6d7c50", "#586740", "#77865c", "#4d5a36", "#7f8d64", "#657449", "#8a976f"];
-  const fir = (px, py, ang, len, w, col) => {
+  x.fillStyle = "#55643f";
+  x.fillRect(0, 0, S, S);
+  bx.fillStyle = "#2a2a2a";
+  bx.fillRect(0, 0, S, S);
+
+  const tonuri = ["#6d7c50", "#586740", "#77865c", "#4d5a36", "#7f8d64", "#657449", "#8a976f", "#909d74"];
+
+  const fir = (px, py, ang, len, w, col, lum) => {
     x.strokeStyle = col;
     x.lineWidth = w;
     x.lineCap = "round";
@@ -179,39 +187,52 @@ function texGazon() {
     x.moveTo(px, py);
     x.lineTo(px + Math.cos(ang) * len, py + Math.sin(ang) * len);
     x.stroke();
+    bx.strokeStyle = "rgba(255,255,255," + lum + ")";
+    bx.lineWidth = w;
+    bx.lineCap = "round";
+    bx.beginPath();
+    bx.moveTo(px, py);
+    bx.lineTo(px + Math.cos(ang) * len, py + Math.sin(ang) * len);
+    bx.stroke();
   };
 
-  // smocuri mari de umbra, ca sa nu fie covor uniform
-  for (let i = 0; i < 260; i++) {
+  for (let i = 0; i < 300; i++) {
     const px = Math.random() * S, py = Math.random() * S;
-    const rr = 22 + Math.random() * 80;
+    const rr = 20 + Math.random() * 85;
     const g = x.createRadialGradient(px, py, 0, px, py, rr);
     const inchis = Math.random() < 0.55;
-    g.addColorStop(0, inchis ? "rgba(40,52,30,0.30)" : "rgba(160,175,125,0.22)");
+    g.addColorStop(0, inchis ? "rgba(36,48,26,0.32)" : "rgba(165,180,130,0.24)");
     g.addColorStop(1, "rgba(0,0,0,0)");
     x.fillStyle = g;
     x.fillRect(px - rr, py - rr, rr * 2, rr * 2);
   }
 
-  const N = 19000;
-  for (let i = 0; i < N; i++) {
-    const px = Math.random() * S, py = Math.random() * S;
-    const ang = -Math.PI / 2 + (Math.random() - 0.5) * 1.7;
-    const len = 5 + Math.random() * 12;
-    const w = 0.9 + Math.random() * 1.7;
-    const col = tonuri[(Math.random() * tonuri.length) | 0];
-    // firele de langa margine se deseneaza si de partea cealalta,
-    // ca textura sa se coasa fara custura vizibila
-    if (px < 22 || px > S - 22 || py < 22 || py > S - 22) {
-      for (const dx of [-S, 0, S])
-        for (const dy of [-S, 0, S]) fir(px + dx, py + dy, ang, len, w, col);
-    } else fir(px, py, ang, len, w, col);
-  }
+  // trei straturi: firele scurte umplu fundalul, cele lungi dau silueta
+  const straturi = [
+    { n: 26000, lmin: 3, lvar: 5, wmin: 0.7, wvar: 0.9, lum: 0.35 },
+    { n: 18000, lmin: 7, lvar: 9, wmin: 1.0, wvar: 1.3, lum: 0.6 },
+    { n: 8000, lmin: 12, lvar: 13, wmin: 1.3, wvar: 1.6, lum: 0.95 },
+  ];
+  for (const st of straturi)
+    for (let i = 0; i < st.n; i++) {
+      const px = Math.random() * S, py = Math.random() * S;
+      const ang = -Math.PI / 2 + (Math.random() - 0.5) * 1.8;
+      const len = st.lmin + Math.random() * st.lvar;
+      const w = st.wmin + Math.random() * st.wvar;
+      const col = tonuri[(Math.random() * tonuri.length) | 0];
+      if (px < 30 || px > S - 30 || py < 30 || py > S - 30) {
+        for (const dx of [-S, 0, S])
+          for (const dy of [-S, 0, S]) fir(px + dx, py + dy, ang, len, w, col, st.lum);
+      } else fir(px, py, ang, len, w, col, st.lum);
+    }
 
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   t.anisotropy = 16;
-  return srgb(t);
+  const tb = new THREE.CanvasTexture(b);
+  tb.wrapS = tb.wrapT = THREE.RepeatWrapping;
+  tb.anisotropy = 8;
+  return { map: srgb(t), bump: tb };
 }
 
 /* ---------- macro-variatie: sparge repetitia dalei ---------- */
@@ -245,14 +266,18 @@ function texMacro() {
 }
 
 /* ---------- solul: detaliu fin + macro + stingere spre orizont ---------- */
-function faSol(latura) {
-  const det = texGazon();
-  det.repeat.set(latura / 3.2, latura / 3.2); // o dala la ~3.2 m
+function faSol(latura, razaPlata) {
+  const G = texGazon();
+  const rep = latura / 3.2;
+  G.map.repeat.set(rep, rep);
+  G.bump.repeat.set(rep, rep);
   const mac = texMacro();
 
   const mat = new THREE.MeshStandardMaterial({
     color: 0xffffff,
-    map: det,
+    map: G.map,
+    bumpMap: G.bump,
+    bumpScale: 0.035,
     roughness: 1,
     metalness: 0,
   });
@@ -270,11 +295,8 @@ function faSol(latura) {
       sh.fragmentShader.replace(
         "#include <map_fragment>",
         `#include <map_fragment>
-         // pete mari de culoare, la alta scara decat dala: fara ele se vede
-         // grila repetata de la 20 m in sus
          vec3 mac = texture2D(uMacro, vWPos.xz * 0.0075).rgb;
          diffuseColor.rgb *= (0.62 + mac * 0.78);
-         // spre orizont totul se stinge in ceata; asa dispare si repetitia
          float dOriz = length(vWPos.xz);
          diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.575, 0.60, 0.545),
                                 smoothstep(45.0, 200.0, dOriz));`
@@ -282,9 +304,26 @@ function faSol(latura) {
     mat.userData.sh = sh;
   };
 
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(latura, latura), mat);
+  // DENIVELARI. Un plan perfect orizontal nu poate avea relief: lumina cade
+  // identic peste tot. Ridic terenul cu unde line, dar numai in afara curtii,
+  // altfel casa, gardul si aleea ar ramane in aer.
+  const geo = new THREE.PlaneGeometry(latura, latura, 160, 160);
+  const po = geo.attributes.position;
+  for (let i = 0; i < po.count; i++) {
+    const px = po.getX(i), py = po.getY(i);
+    const d = Math.hypot(px, py);
+    const k = Math.min(1, Math.max(0, (d - razaPlata) / 45));
+    const h =
+      Math.sin(px * 0.035 + py * 0.021) * 1.35 +
+      Math.sin(px * 0.011 - py * 0.017) * 2.4 +
+      Math.sin(px * 0.083 + py * 0.061) * 0.42;
+    po.setZ(i, h * k * k);
+  }
+  geo.computeVertexNormals();
+
+  const m = new THREE.Mesh(geo, mat);
   m.rotation.x = -Math.PI / 2;
-  m.position.y = 0.004; // peste terenul existent, sub platforma si alee
+  m.position.y = 0.004;
   m.receiveShadow = true;
   return m;
 }
@@ -514,21 +553,23 @@ function geoIarba(L, W, dens, seed) {
       if (Math.abs(jx) < px && Math.abs(jz) < pz) continue;
       if (Math.abs(jx - ax) < 1.15 && jz > az0 && jz < az1) continue;
       const marg = Math.max(Math.abs(jx) / fx, Math.abs(jz) / fz);
-      const hb = (0.075 + r() * 0.05) * (1 + Math.pow(marg, 5) * 2.4);
+      const hb = (0.085 + r() * 0.075) * (1 + Math.pow(marg, 5) * 2.4);
       const d = Math.hypot(jx, jz);
       const cet = Math.min(0.3, Math.max(0, (d - 9) / 44));
-      for (let q = 0; q < 2; q++) {
+      for (let q = 0; q < 3; q++) {
         const ang = r() * Math.PI;
         const wq = (0.15 + r() * 0.1) * 0.5;
         const dx = Math.cos(ang) * wq, dz = Math.sin(ang) * wq;
         const cx = jx + (r() - 0.5) * pas * 0.3, cz = jz + (r() - 0.5) * pas * 0.3;
+        const nix = (r() - 0.5) * 0.5, niz = (r() - 0.5) * 0.5;
+        const nl = Math.hypot(nix, 1, niz);
         const h = hb * (0.78 + r() * 0.44);
         const cor = [[cx - dx, 0, cz - dz], [cx + dx, 0, cz + dz], [cx + dx, h, cz + dz], [cx - dx, h, cz - dz]];
         const sw = [0, 0, 1, 1];
         const uvs = [0, 0, 1, 0, 1, 1, 0, 1];
         for (let k = 0; k < 4; k++) {
           A.pos.push(cor[k][0], cor[k][1], cor[k][2]);
-          A.nor.push(0, 1, 0);
+          A.nor.push(nix / nl, 1 / nl, niz / nl);
           A.uv.push(uvs[k * 2], uvs[k * 2 + 1]);
           const t = sw[k];
           const b = 0.62 + t * 0.46;
@@ -690,7 +731,7 @@ function texturi() {
    ============================================================ */
 export function adaugaGradina(scene, renderer, L, W, optiuni = {}) {
   const o = Object.assign(
-    { copaci: true, iarba: true, gard: true, sol: true, densIarba: 3500, latSol: 400, envMap: true },
+    { copaci: true, iarba: true, gard: true, sol: true, densIarba: 9000, latSol: 400, envMap: true },
     optiuni
   );
   const T = texturi();
@@ -700,7 +741,7 @@ export function adaugaGradina(scene, renderer, L, W, optiuni = {}) {
   if (o.envMap && renderer) scene.environment = mediu(renderer);
 
   /* --- solul --- */
-  if (o.sol) grup.add(faSol(o.latSol));
+  if (o.sol) grup.add(faSol(o.latSol, Math.max(L, W) / 2 + 20));
 
   /* --- copaci --- */
   if (o.copaci) {
