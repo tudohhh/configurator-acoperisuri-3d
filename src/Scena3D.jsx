@@ -4,6 +4,7 @@
 // Structura proiect: vezi acoperis-REPRODUCERE.txt
 import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
+import { adaugaGradina } from "./gradina";
 import { CONFIG_ACOPERIS as C } from "../config/CONFIG";
 
 
@@ -266,7 +267,7 @@ export default function Scena3D({ cfg }) {
         new THREE.MeshStandardMaterial({ color: "#5c6e52", roughness: 1 }));
       co.position.set(px, 1.1 * s + 1.3 * s, pz); co.castShadow = true; scene.add(co);
     };
-    copac(-L / 2 - 4.5, -W / 2 - 2, 1.15);
+// [gradina]     copac(-L / 2 - 4.5, -W / 2 - 2, 1.15);
     { const s2 = 0.9;
       const tr = new THREE.Mesh(new THREE.CylinderGeometry(0.09 * s2, 0.13 * s2, 1.2 * s2, 7),
         new THREE.MeshStandardMaterial({ color: "#6b5744", roughness: 1 }));
@@ -568,6 +569,8 @@ export default function Scena3D({ cfg }) {
     loop();
     const onR = () => { const w = el.clientWidth, h = el.clientHeight; cam.aspect = w / h; cam.updateProjectionMatrix(); rnd.setSize(w, h); };
     window.addEventListener("resize", onR);
+    adaugaGradina(scene, rnd, L, W);
+
     return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", onR); window.removeEventListener("mousemove", move); window.removeEventListener("mouseup", up); rnd.dispose(); el.removeChild(rnd.domElement); };
   }, [cfg]);
   return (
