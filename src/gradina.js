@@ -275,6 +275,8 @@ function faSol(latura, razaPlata) {
 
   const mat = new THREE.MeshStandardMaterial({
     color: 0xffffff,
+    // `map` trebuie sa existe ca three sa includa <map_fragment> in shader.
+    // Nu e citit direct: codul de mai jos il inlocuieste cu dala rotita.
     map: G.map,
     bumpMap: G.bump,
     bumpScale: 0.035,
@@ -284,6 +286,7 @@ function faSol(latura, razaPlata) {
 
   mat.onBeforeCompile = (sh) => {
     sh.uniforms.uMacro = { value: mac };
+    sh.uniforms.uDetaliu = { value: G.map };
     sh.vertexShader =
       "varying vec3 vWPos;\n" +
       sh.vertexShader.replace(
@@ -291,15 +294,46 @@ function faSol(latura, razaPlata) {
         "#include <begin_vertex>\n  vWPos = (modelMatrix * vec4(transformed, 1.0)).xyz;"
       );
     sh.fragmentShader =
-      "uniform sampler2D uMacro;\nvarying vec3 vWPos;\n" +
+      `uniform sampler2D uMacro;
+       uniform sampler2D uDetaliu;
+       varying vec3 vWPos;
+
+       // zgomot ieftin, doar ca sa alegem un unghi pe zona
+       float zg(vec2 p) {
+         return fract(sin(dot(floor(p), vec2(127.1, 311.7))) * 43758.5453);
+       }
+
+       // Dala rotita pe zone. Ochiul recunoaste instant un tipar repetat,
+       // dar nu unul repetat SI rotit altfel la fiecare zona.
+       vec3 dalaRotita(vec2 uv, float marimeZona) {
+         vec2 zona = uv / marimeZona;
+         float a = zg(zona) * 6.2831;
+         float ca = cos(a), sa = sin(a);
+         vec2 centru = (floor(zona) + 0.5) * marimeZona;
+         vec2 d = uv - centru;
+         vec2 rot = vec2(d.x * ca - d.y * sa, d.x * sa + d.y * ca) + centru;
+         return texture2D(uDetaliu, rot).rgb;
+       }
+       ` +
       sh.fragmentShader.replace(
         "#include <map_fragment>",
-        `#include <map_fragment>
-         vec3 mac = texture2D(uMacro, vWPos.xz * 0.0075).rgb;
-         diffuseColor.rgb *= (0.62 + mac * 0.78);
-         float dOriz = length(vWPos.xz);
-         diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.575, 0.60, 0.545),
-                                smoothstep(45.0, 200.0, dOriz));`
+        `vec2 wxz = vWPos.xz;
+
+         // doua scari ale detaliului, cu perioade care nu se divid una pe alta:
+         // cea mica pentru aproape, cea mare pentru departe
+         vec3 aproape = dalaRotita(wxz / 3.2, 7.0);
+         vec3 departe = dalaRotita(wxz / 11.3, 3.0);
+         float dOriz = length(wxz);
+         vec3 baza = mix(aproape, departe, smoothstep(18.0, 70.0, dOriz));
+
+         // doua scari de macro-variatie, tot cu perioade neinrudite:
+         // cu una singura, dalele se realiniaza cu ea si grila reapare
+         vec3 m1 = texture2D(uMacro, wxz * 0.0075).rgb;
+         vec3 m2 = texture2D(uMacro, wxz * 0.0286 + vec2(0.37, 0.61)).rgb;
+         baza *= (0.52 + m1 * 0.62) * (0.72 + m2 * 0.52);
+
+         baza = mix(baza, vec3(0.575, 0.60, 0.545), smoothstep(45.0, 200.0, dOriz));
+         diffuseColor.rgb *= baza;`
       );
     mat.userData.sh = sh;
   };
